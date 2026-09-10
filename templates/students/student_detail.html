@@ -1,0 +1,72 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+
+<h2>Student Details</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h3>
+            {{ student.first_name }}
+            {{ student.last_name }}
+        </h3>
+
+        <hr>
+
+        <p>
+            <strong>Admission Number:</strong>
+            {{ student.admission_no }}
+        </p>
+
+        <p>
+            <strong>Roll Number:</strong>
+            {{ student.roll_no }}
+        </p>
+
+        <p>
+            <strong>Branch:</strong>
+            {{ student.branch.name }}
+        </p>
+
+        <p>
+            <strong>Admission Year:</strong>
+            {{ student.admission_year }}
+        </p>
+
+        <p>
+            <strong>Semester:</strong>
+            {{ student.current_semester }}
+        </p>
+
+        <p>
+            <strong>Phone:</strong>
+            {{ student.phone }}
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            {{ student.email }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            {{ student.status }}
+        </p>
+
+        <a
+            href="{% url 'student-update' student.id %}"
+            class="btn btn-warning"
+        >
+            Edit
+        </a>
+
+        <a
+            href="{% url 'student-delete' student.id %}"
+            class="btn btn-danger"
+        >
+            Delete
+        </a>
+    </div>
+</div>
+
+{% endblock %}

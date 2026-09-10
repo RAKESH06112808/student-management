@@ -1,0 +1,67 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+
+<h2>Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Total Students</h5>
+                <h2>{{ student_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Active Students</h5>
+                <h2>{{ active_student_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Branch Statistics</h3>
+
+<table class="table table-bordered bg-white">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Branch</th>
+            <th>Students</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for branch in branch_stats %}
+        <tr>
+            <td>{{ branch.code }}</td>
+            <td>{{ branch.name }}</td>
+            <td>{{ branch.student_count }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No branches available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a
+    href="{% url 'student-create' %}"
+    class="btn btn-primary"
+>
+    Add Student
+</a>
+
+<a
+    href="{% url 'student-list' %}"
+    class="btn btn-secondary"
+>
+    View Students
+</a>
+
+{% endblock %}
