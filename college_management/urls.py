@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from student.views import CustomLoginView
 
 
 urlpatterns = [
@@ -8,7 +9,7 @@ urlpatterns = [
 
     path(
         "accounts/login/",
-        auth_views.LoginView.as_view(
+        CustomLoginView.as_view(
             template_name="registration/login.html"
         ),
         name="login",

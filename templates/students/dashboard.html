@@ -39,7 +39,11 @@
         {% for branch in branch_stats %}
         <tr>
             <td>{{ branch.code }}</td>
-            <td>{{ branch.name }}</td>
+            <td>
+                <a href="{% url 'branch-dashboard' branch.code %}">
+                    {{ branch.name }}
+                </a>
+            </td>
             <td>{{ branch.student_count }}</td>
         </tr>
         {% empty %}

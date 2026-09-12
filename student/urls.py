@@ -6,6 +6,8 @@ urlpatterns = [
 
 from .views import (
     DashboardView,
+    BranchDashboardView,
+    MyProfileView,
     StudentListView,
     StudentDetailView,
     StudentCreateView,
@@ -45,5 +47,16 @@ urlpatterns = [
         "students/<int:pk>/delete/",
         StudentDeleteView.as_view(),
         name="student-delete"
+    ),
+
+    path(
+        "branch/<str:code>/",
+           BranchDashboardView.as_view(),
+           name="branch-dashboard"),
+
+    path(
+        "my-profile/",
+        MyProfileView.as_view(),
+        name="my-profile"
     ),
 ]

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Branch(models.Model):
@@ -32,6 +33,15 @@ class Student(models.Model):
         (7, "Semester 7"),
         (8, "Semester 8"),
     ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="student_profile",
+    )
+
 
     admission_no = models.CharField(
         max_length=30,
