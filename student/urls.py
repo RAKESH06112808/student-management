@@ -1,9 +1,5 @@
 from django.urls import path
-from . import views 
-urlpatterns = [
-]
-
-
+from . import views
 from .views import (
     DashboardView,
     BranchDashboardView,
@@ -17,6 +13,9 @@ from .views import (
     VerifyMobileView,
     VerifyOTPView,
     NewPasswordView,
+    download_all_students_pdf,
+    download_student_pdf,
+    download_my_profile_pdf,
 )
 
 
@@ -55,34 +54,55 @@ urlpatterns = [
 
     path(
         "branch/<str:code>/",
-           BranchDashboardView.as_view(),
-           name="branch-dashboard"),
+        BranchDashboardView.as_view(),
+        name="branch-dashboard"
+    ),
 
     path(
         "my-profile/",
         MyProfileView.as_view(),
         name="my-profile"
     ),
+
     path(
         "forgot-password/",
         ForgotPasswordView.as_view(),
         name="forgot_password"
-    ), 
+    ),
 
     path(
-    "forgot-password/verify/",
-    VerifyMobileView.as_view(),
-    name="verify_mobile"
-),
+        "forgot-password/verify/",
+        VerifyMobileView.as_view(),
+        name="verify_mobile"
+    ),
 
     path(
-    "forgot-password/otp/",
-    VerifyOTPView.as_view(),
-    name="verify_otp"
-),
+        "forgot-password/otp/",
+        VerifyOTPView.as_view(),
+        name="verify_otp"
+    ),
+
     path(
         "forgot-password/new-password/",
         NewPasswordView.as_view(),
         name="new_password"
-    )
+    ),
+
+    path(
+        "students/pdf/",
+        download_all_students_pdf,
+        name="students-pdf"
+    ),
+
+    path(
+        "students/<int:pk>/pdf/",
+        download_student_pdf,
+        name="student-pdf"
+    ),
+
+    path(
+        "my-profile/pdf/",
+        download_my_profile_pdf,
+        name="my-profile-pdf"
+    ),
 ]

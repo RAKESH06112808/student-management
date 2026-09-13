@@ -5,6 +5,10 @@
 <div class="d-flex justify-content-between mb-3">
     <h2>Students</h2>
 
+    <a href="{% url 'students-pdf' %}">
+    📄 Download All Students PDF
+</a>
+
     <a
         href="{% url 'student-create' %}"
         class="btn btn-primary"
@@ -84,6 +88,13 @@
                 >
                     Edit
                 </a>
+
+                <a
+    href="{% url 'student-pdf' student.id %}"
+    class="btn btn-secondary btn-sm"
+>
+ PDF
+</a>
             </td>
         </tr>
 

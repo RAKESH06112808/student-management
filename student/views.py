@@ -1,5 +1,8 @@
 import secrets
 import os
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
 from twilio.rest import Client
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
@@ -381,3 +384,198 @@ class NewPasswordView(TemplateView):
         request.session.pop("otp_verified", None)
 
         return redirect("login")
+
+    # =========================
+# PDF DOWNLOAD VIEWS
+# =========================
+
+def download_all_students_pdf(request):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return redirect("login")
+
+    students = Student.objects.select_related("branch").all().order_by(
+        "admission_no"
+    )
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+
+    pdf.setTitle("All Students")
+
+    y = 800
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, y, "All Students")
+    y -= 30
+
+    pdf.setFont("Helvetica", 10)
+
+    for student in students:
+        full_name = f"{student.first_name} {student.last_name}".strip()
+
+        lines = [
+            f"Admission No: {student.admission_no}",
+            f"Roll No: {student.roll_no}",
+            f"Name: {full_name}",
+            f"Branch: {student.branch.code} - {student.branch.name}",
+            f"Admission Year: {student.admission_year}",
+            f"Semester: {student.current_semester}",
+            f"Gender: {student.gender}",
+            f"Date of Birth: {student.date_of_birth or ''}",
+            f"Phone: {student.phone}",
+            f"Email: {student.email}",
+            f"Status: {student.status}",
+            f"Address: {student.address}",
+        ]
+
+        for line in lines:
+            pdf.drawString(50, y, line)
+            y -= 15
+
+            if y < 50:
+                pdf.showPage()
+                y = 800
+                pdf.setFont("Helvetica", 10)
+
+        y -= 15
+
+    pdf.save()
+
+    buffer.seek(0)
+
+    response = HttpResponse(
+        buffer,
+        content_type="application/pdf"
+    )
+
+    response["Content-Disposition"] = (
+        'attachment; filename="all_students.pdf"'
+    )
+
+    return response
+
+
+def download_student_pdf(request, pk):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return redirect("login")
+
+    student = get_object_or_404(
+        Student.objects.select_related("branch"),
+        pk=pk
+    )
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+
+    full_name = f"{student.first_name} {student.last_name}".strip()
+
+    pdf.setTitle(f"Student Profile - {full_name}")
+
+    y = 800
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, y, "Student Profile")
+    y -= 35
+
+    pdf.setFont("Helvetica", 11)
+
+    lines = [
+        f"Admission No: {student.admission_no}",
+        f"Roll No: {student.roll_no}",
+        f"Name: {full_name}",
+        f"Date of Birth: {student.date_of_birth or ''}",
+        f"Gender: {student.gender}",
+        f"Phone: {student.phone}",
+        f"Email: {student.email}",
+        f"Address: {student.address}",
+        f"Branch: {student.branch.code} - {student.branch.name}",
+        f"Admission Year: {student.admission_year}",
+        f"Current Semester: {student.current_semester}",
+        f"Status: {student.status}",
+    ]
+
+    for line in lines:
+        pdf.drawString(50, y, line)
+        y -= 25
+
+    pdf.save()
+
+    buffer.seek(0)
+
+    response = HttpResponse(
+        buffer,
+        content_type="application/pdf"
+    )
+
+    filename = (
+        f"{student.admission_no}_student_profile.pdf"
+    )
+
+    response["Content-Disposition"] = (
+        f'attachment; filename="{filename}"'
+    )
+
+    return response
+
+
+def download_my_profile_pdf(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    student = get_object_or_404(
+        Student.objects.select_related("branch"),
+        user=request.user
+    )
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+
+    full_name = f"{student.first_name} {student.last_name}".strip()
+
+    pdf.setTitle(f"My Student Profile - {full_name}")
+
+    y = 800
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, y, "My Student Profile")
+    y -= 35
+
+    pdf.setFont("Helvetica", 11)
+
+    lines = [
+        f"Admission No: {student.admission_no}",
+        f"Roll No: {student.roll_no}",
+        f"Name: {full_name}",
+        f"Date of Birth: {student.date_of_birth or ''}",
+        f"Gender: {student.gender}",
+        f"Phone: {student.phone}",
+        f"Email: {student.email}",
+        f"Address: {student.address}",
+        f"Branch: {student.branch.code} - {student.branch.name}",
+        f"Admission Year: {student.admission_year}",
+        f"Current Semester: {student.current_semester}",
+        f"Status: {student.status}",
+    ]
+
+    for line in lines:
+        pdf.drawString(50, y, line)
+        y -= 25
+
+    pdf.save()
+
+    buffer.seek(0)
+
+    response = HttpResponse(
+        buffer,
+        content_type="application/pdf"
+    )
+
+    filename = (
+        f"{student.admission_no}_my_profile.pdf"
+    )
+
+    response["Content-Disposition"] = (
+        f'attachment; filename="{filename}"'
+    )
+
+    return response
