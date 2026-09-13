@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Branch, Student
+from .models import Branch, Student, HODProfile
+
+
+@admin.register(HODProfile)
+class HODProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "phone", "email")
 
 
 @admin.register(Branch)

@@ -13,6 +13,10 @@ from .views import (
     StudentCreateView,
     StudentUpdateView,
     StudentDeleteView,
+    ForgotPasswordView,
+    VerifyMobileView,
+    VerifyOTPView,
+    NewPasswordView,
 )
 
 
@@ -59,4 +63,26 @@ urlpatterns = [
         MyProfileView.as_view(),
         name="my-profile"
     ),
+    path(
+        "forgot-password/",
+        ForgotPasswordView.as_view(),
+        name="forgot_password"
+    ), 
+
+    path(
+    "forgot-password/verify/",
+    VerifyMobileView.as_view(),
+    name="verify_mobile"
+),
+
+    path(
+    "forgot-password/otp/",
+    VerifyOTPView.as_view(),
+    name="verify_otp"
+),
+    path(
+        "forgot-password/new-password/",
+        NewPasswordView.as_view(),
+        name="new_password"
+    )
 ]
