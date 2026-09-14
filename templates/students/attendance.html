@@ -134,7 +134,15 @@
                     <tr>
                         <td>{{ record.date|date:"d-m-Y" }}</td>
 
-                        <td>{{ record.status }}</td>
+                        <td>{{ record.status }}
+                            <br>
+                            <ahref="{% url 'edit-attendance' record.pk %}"
+                            class=""btn btn-warning btn-sm mt-1"
+                            >
+                                ✏️ Edit
+                                </a>
+
+                        </td>
 
                         <td>
                             {% if record.is_extension_day %}

@@ -1,0 +1,369 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+{% if edit_mode %}
+            <h2>Edit Attendance</h2>
+{% else %}       
+            <h2>Bulk Attendance</h2>
+{% endif %}
+            <p class="mb-0">
+                <strong>Branch:</strong> {{ branch.code }} - {{ branch.name }}
+            </p>
+        </div>
+
+        <a
+            href="{% url 'branch-dashboard' branch.code %}"
+            class="btn btn-secondary"
+        >
+            ← Back to Branch
+        </a>
+
+        <a
+    href="{% url 'export-branch-attendance' branch.code %}"
+    class="btn btn-success"
+>
+    📊 Export Excel
+</a>
+    </div>
+
+    <hr>
+
+    <!-- Date -->
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <label class="form-label">
+                <strong>Attendance Date</strong>
+            </label>
+
+            <input
+                type="date"
+                id="attendanceDate"
+                class="form-control"
+                value="{{ selected_date|date:'Y-m-d' }}"
+                onchange="changeDate(this.value)"
+            >
+
+        </div>
+    </div>
+
+    <!-- Search and filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <strong>Search Student</strong>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="studentSearch"
+                        class="form-control"
+                        placeholder="Search by PIN, Roll No or Name"
+                        onkeyup="filterStudents()"
+                    >
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <strong>Semester</strong>
+                    </label>
+
+                    <select
+                        id="semesterFilter"
+                        class="form-select"
+                        onchange="filterStudents()"
+                    >
+                        <option value="">All Semesters</option>
+
+                        {% for semester in "12345678" %}
+                            <option value="{{ semester }}">
+                                Semester {{ semester }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary w-100"
+                        onclick="selectVisibleStudents()"
+                    >
+                        Select Visible
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bulk attendance form -->
+    <form method="post">
+
+        {% csrf_token %}
+
+    {% if edit_mode %}
+    <input type="hidden" name="edit_mode" value="1">
+{% endif %}
+
+        <input
+            type="hidden"
+            name="date"
+            value="{{ selected_date|date:'Y-m-d' }}"
+        >
+
+        <!-- Status -->
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            <strong>Status for Selected Students</strong>
+                        </label>
+
+                        <select
+                            name="status"
+                            id="bulkStatus"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                -- Select Status --
+                            </option>
+
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}">
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="form-check mb-2">
+
+                            <input
+                                type="checkbox"
+                                name="is_extension_day"
+                                id="extensionDay"
+                                class="form-check-input"
+                            >
+
+                            <label
+                                for="extensionDay"
+                                class="form-check-label"
+                            >
+                                Extension Day
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <button
+                            type="submit"
+                            class="btn btn-success w-100"
+                        >
+                            Save Attendance
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Student list -->
+        <div class="card">
+
+            <div class="card-header d-flex justify-content-between">
+
+                <strong>
+                    Students
+                </strong>
+
+                <span>
+                    Selected:
+                    <strong id="selectedCount">0</strong>
+                </span>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>
+                                <input
+                                    type="checkbox"
+                                    id="selectAll"
+                                    onclick="toggleAll(this)"
+                                >
+                            </th>
+                            <th>PIN</th>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Semester</th>
+                            <th>Attendance</th>
+                    </thead>
+
+                    <tbody id="studentTable">
+
+                       {% for row in student_rows %}
+
+    <tr
+        class="student-row"
+        data-search="
+            {{ row.student.admission_no }}
+            {{ row.student.roll_no }}
+            {{ row.student.first_name }}
+            {{ row.student.last_name }}
+        "
+        data-semester="{{ row.student.current_semester }}"
+    >
+
+        <td>
+            <input
+                type="checkbox"
+                name="student_ids"
+                value="{{ row.student.id }}"
+                class="student-checkbox"
+                onchange="updateSelectedCount()"
+            >
+        </td>
+
+        <td>
+            {{ row.student.admission_no }}
+        </td>
+
+        <td>
+            {{ row.student.roll_no }}
+        </td>
+
+        <td>
+            {{ row.student.first_name }}
+            {{ row.student.last_name }}
+        </td>
+
+        <td>
+            Semester {{ row.student.current_semester }}
+        </td>
+
+        <td>
+            {% if row.attendance %}
+                {{ row.attendance.status }}
+            {% else %}
+                Not Marked
+            {% endif %}
+        </td>
+
+    </tr>
+
+{% empty %}
+
+    <tr>
+        <td colspan="6" class="text-center">
+            No students found in this branch.
+        </td>
+    </tr>
+
+{% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+</form>
+
+</div>
+<script>
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll(".student-checkbox:checked");
+    document.getElementById("selectedCount").textContent = checkboxes.length;
+}
+
+function toggleAll(source) {
+    const checkboxes = document.querySelectorAll(".student-checkbox");
+
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = source.checked;
+    });
+
+    updateSelectedCount();
+}
+
+function selectVisibleStudents() {
+    const rows = document.querySelectorAll(".student-row");
+
+    rows.forEach(function(row) {
+        if (row.style.display !== "none") {
+            const checkbox = row.querySelector(".student-checkbox");
+
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        }
+    });
+
+    updateSelectedCount();
+}
+
+function filterStudents() {
+    const searchText = document.getElementById("studentSearch").value.toLowerCase();
+    const semester = document.getElementById("semesterFilter").value;
+
+    const rows = document.querySelectorAll(".student-row");
+
+    rows.forEach(function(row) {
+        const searchData = row.getAttribute("data-search").toLowerCase();
+        const rowSemester = row.getAttribute("data-semester");
+
+        const matchesSearch = searchData.includes(searchText);
+        const matchesSemester = semester === "" || rowSemester === semester;
+
+        if (matchesSearch && matchesSemester) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+function changeDate(date) {
+    const editMode = "{{ edit_mode|yesno:'1,0' }}";
+
+    let url = window.location.pathname + "?date=" + date;
+
+    if (editMode === "1") {
+        url += "&edit=1";
+    }
+
+    window.location.href = url;
+}
+</script>
+
+{% endblock %}

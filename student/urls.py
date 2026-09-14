@@ -48,6 +48,12 @@ urlpatterns = [
     ),
 
     path(
+    "attendance/<int:pk>/edit/",
+    views.EditAttendanceView.as_view(),
+    name="edit-attendance",
+),
+
+    path(
         "students/<int:pk>/edit/",
         StudentUpdateView.as_view(),
         name="student-update"
@@ -65,6 +71,18 @@ urlpatterns = [
         name="branch-dashboard"
     ),
 
+    path(
+        "branch/<str:code>/" \
+        "bulk-attendance/",
+        views.BulkAttendanceView.as_view(),
+        name="bulk-attendance",
+    ),
+
+    path(
+    "branch/<str:code>/attendance/export/",
+    views.export_branch_attendance_excel,
+    name="export-branch-attendance",
+),
     path(
         "my-profile/",
         MyProfileView.as_view(),

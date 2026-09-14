@@ -6,6 +6,21 @@
 
     <h2>{{ branch.name }} Students</h2>
 
+<div class="mt-3 mb-3">
+
+    <a
+        href="{% url 'bulk-attendance' branch.code %}"
+        class="btn btn-primary"
+    >
+        📋 Attendance
+    </a>
+
+    <a href="{% url 'bulk-attendance' branch.code %}?edit=1" class="btn btn-warning">
+    ✏️ Edit Attendance
+</a>
+
+</div>
+
     {% if students %}
         <div class="table-responsive mt-3">
 

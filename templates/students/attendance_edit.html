@@ -1,0 +1,56 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Edit Attendance</h2>
+
+    <div class="mb-3">
+        <strong>Student:</strong>
+        {{ attendance.student.first_name }}
+        {{ attendance.student.last_name }}
+        <br>
+
+        <strong>Roll No:</strong>
+        {{ attendance.student.roll_no }}
+        <br>
+
+        <strong>Admission No:</strong>
+        {{ attendance.student.admission_no }}
+        <br>
+
+        <strong>Date:</strong>
+        {{ attendance.date|date:"d-m-Y" }}
+    </div>
+
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ form.status.label_tag }}
+            {{ form.status }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.is_extension_day }}
+            {{ form.is_extension_day.label_tag }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Save Changes
+        </button>
+
+        <a
+            href="{% url 'student-attendance' attendance.student.pk %}"
+            class="btn btn-secondary"
+        >
+            Cancel
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

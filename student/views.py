@@ -2,8 +2,10 @@ import secrets
 import os
 from datetime import datetime
 from io import BytesIO
+import openpyxl
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
+
 from twilio.rest import Client
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
@@ -14,7 +16,6 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
 from django.views import View
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
-
 from .models import Student, Branch, HODProfile, Attendance
 from .forms import StudentForm, AttendanceForm
 from .attendance_utils import calculate_attendance, get_default_attendance_status
@@ -129,6 +130,54 @@ class AttendanceView(HODRequiredMixin, View):
             pk=student.pk,
         )
 
+class EditAttendanceView(HODRequiredMixin, View):
+    template_name = "students/attendance_edit.html"
+
+    def get(self, request, pk):
+        attendance = get_object_or_404(
+            Attendance,
+            pk=pk
+        )
+
+        form = AttendanceForm(instance=attendance)
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "attendance": attendance,
+                "form": form,
+            },
+        )
+
+    def post(self, request, pk):
+        attendance = get_object_or_404(
+            Attendance,
+            pk=pk
+        )
+
+        form = AttendanceForm(
+            request.POST,
+            instance=attendance
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "student-attendance",
+                pk=attendance.student.pk
+            )
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "attendance": attendance,
+                "form": form,
+            },
+        )
+
 
 class DashboardView(HODRequiredMixin, TemplateView):
     template_name = "students/dashboard.html"
@@ -220,6 +269,175 @@ class BranchDashboardView(LoginRequiredMixin, TemplateView):
         context["students"] = students
         return context
 
+
+class BulkAttendanceView(HODRequiredMixin, View):
+    template_name = "students/bulk_attendance.html"
+
+    def get(self, request, code):
+        branch = get_object_or_404(Branch, code=code)
+
+        selected_date = request.GET.get("date")
+        if selected_date:
+            try:
+                selected_date = datetime.strptime(
+                    selected_date, "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                selected_date = timezone.localdate()
+        else:
+            selected_date = timezone.localdate()
+
+        edit_mode = request.GET.get("edit") == "1"
+
+        students = Student.objects.filter(
+            branch=branch
+        ).order_by("roll_no")
+
+        attendance_records = Attendance.objects.filter(
+            student__branch=branch,
+            date=selected_date
+        )
+
+        attendance_map = {
+            record.student_id: record
+            for record in attendance_records
+        }
+
+        student_rows = [
+            {
+                "student": student,
+                "attendance": attendance_map.get(student.id),
+            }
+            for student in students
+        ]
+
+        return render(request, self.template_name, {
+            "branch": branch,
+            "students": students,
+            "student_rows": student_rows,
+            "selected_date": selected_date,
+            "status_choices": Attendance.STATUS_CHOICES,
+            "edit_mode": edit_mode,
+        })
+
+    def post(self, request, code):
+        branch = get_object_or_404(Branch, code=code)
+
+        selected_date = request.POST.get("date")
+        status = request.POST.get("status")
+        student_ids = request.POST.getlist("student_ids")
+        is_extension_day = request.POST.get("is_extension_day") == "on"
+        edit_mode = request.POST.get("edit_mode") == "1"
+
+        try:
+            selected_date = datetime.strptime(
+                selected_date, "%Y-%m-%d"
+            ).date()
+        except (ValueError, TypeError):
+            selected_date = timezone.localdate()
+
+        valid_statuses = dict(Attendance.STATUS_CHOICES)
+
+        if status not in valid_statuses:
+            return redirect(
+                f"{reverse_lazy('bulk-attendance', kwargs={'code': branch.code})}"
+                f"?edit={'1' if edit_mode else '0'}"
+            )
+
+        students = Student.objects.filter(
+            branch=branch,
+            id__in=student_ids
+        )
+
+        is_sunday = selected_date.weekday() == 6
+
+        is_second_saturday = (
+            selected_date.weekday() == 5
+            and 8 <= selected_date.day <= 14
+        )
+
+        # Sunday and second Saturday are always Weekend Holiday
+        if is_sunday or is_second_saturday:
+            status = "Weekend Holiday"
+            is_extension_day = False
+
+        for student in students:
+            Attendance.objects.update_or_create(
+                student=student,
+                date=selected_date,
+                defaults={
+                    "status": status,
+                    "is_extension_day": is_extension_day,
+                },
+            )
+
+        if edit_mode:
+            return redirect(
+                f"{reverse_lazy('bulk-attendance', kwargs={'code': branch.code})}"
+                f"?edit=1&date={selected_date}"
+            )
+
+        return redirect(
+            f"{reverse_lazy('bulk-attendance', kwargs={'code': branch.code})}"
+            f"?date={selected_date}"
+        )
+
+def export_branch_attendance_excel(request, code):
+    branch = get_object_or_404(Branch, code=code)
+
+    records = Attendance.objects.filter(
+        student__branch=branch
+    ).select_related(
+        "student"
+    ).order_by(
+        "date",
+        "student__roll_no"
+    )
+
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Attendance"
+
+    worksheet.append([
+        "PIN",
+        "Roll No",
+        "Student Name",
+        "Semester",
+        "Date",
+        "Status",
+        "Extension Day",
+    ])
+
+    for record in records:
+        worksheet.append([
+            record.student.admission_no,
+            record.student.roll_no,
+            f"{record.student.first_name} {record.student.last_name}".strip(),
+            record.student.current_semester,
+            record.date,
+            record.status,
+            "Yes" if record.is_extension_day else "No",
+        ])
+
+    from io import BytesIO
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    response["Content-Disposition"] = (
+        f'attachment; filename="{branch.code}_attendance.xlsx"'
+    )
+
+    return response
 
 class MyProfileView(LoginRequiredMixin, DetailView):
     model = Student
