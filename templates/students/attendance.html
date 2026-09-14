@@ -1,0 +1,164 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Attendance</h2>
+
+    <div class="mb-3">
+        <strong>Student:</strong>
+        {{ student.first_name }} {{ student.last_name }}
+        <br>
+        <strong>Roll No:</strong> {{ student.roll_no }}
+        <br>
+        <strong>Admission No:</strong> {{ student.admission_no }}
+    </div>
+
+    <hr>
+
+    <h4>Attendance Summary</h4>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <strong>Present:</strong> {{ summary.present }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Half Day:</strong> {{ summary.half_day }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Absent:</strong> {{ summary.absent }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Error:</strong> {{ summary.error }}
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <strong>Holiday:</strong> {{ summary.holiday }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Weekend Holiday:</strong>
+            {{ summary.weekend_holiday }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Extension Days:</strong>
+            {{ summary.extension_days }}
+        </div>
+
+        <div class="col-md-3">
+            <strong>Working Days:</strong>
+            {{ summary.working_days }}
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Earned Attendance:</strong>
+        {{ summary.earned_attendance }}
+        / {{ summary.official_working_days }}
+
+        <br>
+
+        <strong>Attendance Percentage:</strong>
+        {{ summary.percentage }}%
+    </div>
+
+    <hr>
+
+    <h4>Mark Attendance</h4>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <input
+            type="hidden"
+            name="date"
+            value="{{ selected_date|date:'Y-m-d' }}"
+        >
+
+        <div class="mb-3">
+            <label class="form-label">
+                <strong>Date</strong>
+            </label>
+
+            <input
+                type="date"
+                class="form-control"
+                value="{{ selected_date|date:'Y-m-d' }}"
+                onchange="window.location.href='?date=' + this.value"
+            >
+        </div>
+
+        <div class="mb-3">
+            {{ form.status.label_tag }}
+            {{ form.status }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.is_extension_day }}
+            {{ form.is_extension_day.label_tag }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Save Attendance
+        </button>
+    </form>
+
+    <hr>
+
+    <h4>Attendance Records</h4>
+
+    {% if records %}
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Extension Day</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in records %}
+
+                    <tr>
+                        <td>{{ record.date|date:"d-m-Y" }}</td>
+
+                        <td>{{ record.status }}</td>
+
+                        <td>
+                            {% if record.is_extension_day %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>No attendance records yet.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

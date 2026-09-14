@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Branch, Student, HODProfile, Attendance
+from .models import Branch, Student, HODProfile
 
 
 @admin.register(HODProfile)
@@ -39,28 +39,3 @@ class StudentAdmin(admin.ModelAdmin):
         "last_name",
         "phone",
     ]
-
-
-@admin.register(Attendance)
-class AttendanceAdmin(admin.ModelAdmin):
-    list_display = (
-        "student",
-        "date",
-        "status",
-        "is_extension_day",
-    )
-
-    list_filter = (
-        "status",
-        "is_extension_day",
-        "date",
-    )
-
-    search_fields = (
-        "student__admission_no",
-        "student__roll_no",
-        "student__first_name",
-        "student__last_name",
-    )
-
-    ordering = ("-date", "student")

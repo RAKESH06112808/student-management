@@ -9,7 +9,6 @@ from .views import (
     StudentCreateView,
     StudentUpdateView,
     StudentDeleteView,
-    AttendanceView,
     ForgotPasswordView,
     VerifyMobileView,
     VerifyOTPView,
@@ -42,12 +41,6 @@ urlpatterns = [
     ),
 
     path(
-        "students/<int:pk>/attendance/",
-        AttendanceView.as_view(),
-        name="student-attendance"
-    ),
-
-    path(
         "students/<int:pk>/edit/",
         StudentUpdateView.as_view(),
         name="student-update"
@@ -69,12 +62,6 @@ urlpatterns = [
         "my-profile/",
         MyProfileView.as_view(),
         name="my-profile"
-    ),
-
-    path(
-        "my-attendance/",
-        views.MyAttendanceView.as_view(),
-        name="my-attendance"
     ),
 
     path(

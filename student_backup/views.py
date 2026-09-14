@@ -1,6 +1,5 @@
 import secrets
 import os
-from datetime import datetime
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
@@ -11,123 +10,14 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.views import View
-from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Student, Branch, HODProfile, Attendance
-from .forms import StudentForm, AttendanceForm
-from .attendance_utils import calculate_attendance, get_default_attendance_status
+from .models import Student, Branch, HODProfile
+from .forms import StudentForm
 
 class HODRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
-
-class AttendanceView(HODRequiredMixin, View):
-    template_name = "students/attendance.html"
-
-    def get(self, request, pk):
-        student = get_object_or_404(Student, pk=pk)
-
-        selected_date = request.GET.get("date")
-
-        if selected_date:
-            try:
-                selected_date = datetime.strptime(
-                    selected_date, "%Y-%m-%d"
-                ).date()
-            except ValueError:
-                selected_date = timezone.localdate()
-        else:
-            selected_date = timezone.localdate()
-
-        attendance_record = Attendance.objects.filter(
-            student=student,
-            date=selected_date
-        ).first()
-
-        if attendance_record:
-            form = AttendanceForm(instance=attendance_record)
-        else:
-            default_status = get_default_attendance_status(selected_date)
-
-            form = AttendanceForm(
-                initial={
-                    "status": default_status,
-                    "is_extension_day": False,
-                }
-            )
-
-        records = Attendance.objects.filter(
-            student=student
-        ).order_by("-date")
-
-        summary = calculate_attendance(records)
-
-        return render(
-            request,
-            self.template_name,
-            {
-                "student": student,
-                "form": form,
-                "selected_date": selected_date,
-                "records": records,
-                "summary": summary,
-            },
-        )
-
-    def post(self, request, pk):
-        student = get_object_or_404(Student, pk=pk)
-
-        selected_date = request.POST.get("date")
-
-        try:
-            selected_date = datetime.strptime(
-                selected_date, "%Y-%m-%d"
-            ).date()
-        except (ValueError, TypeError):
-            selected_date = timezone.localdate()
-
-        attendance_record = Attendance.objects.filter(
-            student=student,
-            date=selected_date
-        ).first()
-
-        is_sunday = selected_date.weekday() == 6
-
-        is_second_saturday = (
-            selected_date.weekday() == 5
-            and 8 <= selected_date.day <= 14
-        )
-
-        if is_sunday or is_second_saturday:
-            Attendance.objects.update_or_create(
-                student=student,
-                date=selected_date,
-                defaults={
-                    "status": "Weekend Holiday",
-                    "is_extension_day": False,
-                },
-            )
-        else:
-            if attendance_record:
-                form = AttendanceForm(
-                    request.POST,
-                    instance=attendance_record,
-                )
-            else:
-                form = AttendanceForm(request.POST)
-
-            if form.is_valid():
-                attendance = form.save(commit=False)
-                attendance.student = student
-                attendance.date = selected_date
-                attendance.save()
-
-        return redirect(
-            "student-attendance",
-            pk=student.pk,
-        )
 
 
 class DashboardView(HODRequiredMixin, TemplateView):
@@ -228,33 +118,6 @@ class MyProfileView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(Student, user=self.request.user)
-
-class MyAttendanceView(LoginRequiredMixin, DetailView):
-    model = Student
-    template_name = "students/my_attendance.html"
-    context_object_name = "student"
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(
-            Student,
-            user=self.request.user
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        student = self.object
-
-        records = Attendance.objects.filter(
-            student=student
-        ).order_by("-date")
-
-        summary = calculate_attendance(records)
-
-        context["records"] = records
-        context["summary"] = summary
-
-        return context
 
 
 class CustomLoginView(LoginView):

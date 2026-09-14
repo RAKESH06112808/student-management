@@ -1,10 +1,11 @@
 from django import forms
-from .models import Student, Attendance
+from .models import Student
 
 
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
+
         fields = [
             "admission_no",
             "roll_no",
@@ -27,27 +28,5 @@ class StudentForm(forms.ModelForm):
             ),
             "address": forms.Textarea(
                 attrs={"rows": 3}
-            ),
-        }
-
-
-class AttendanceForm(forms.ModelForm):
-    class Meta:
-        model = Attendance
-        fields = [
-            "status",
-            "is_extension_day",
-        ]
-
-        widgets = {
-            "status": forms.Select(
-                attrs={
-                    "class": "form-control"
-                }
-            ),
-            "is_extension_day": forms.CheckboxInput(
-                attrs={
-                    "class": "form-check-input"
-                }
             ),
         }
