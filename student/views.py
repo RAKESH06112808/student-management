@@ -193,9 +193,10 @@ class DashboardView(HODRequiredMixin, TemplateView):
 
         context["branch_stats"] = Branch.objects.annotate(
             student_count=Count("students")
-        ).order_by("code")
+        )
 
         return context
+
 
 class StudentListView(HODRequiredMixin, ListView):
     model = Student
@@ -330,7 +331,8 @@ class BulkAttendanceView(HODRequiredMixin, View):
 
         try:
             selected_date = datetime.strptime(
-                selected_date, "%Y-%m-%d"
+                selected_date,
+                "%Y-%m-%d"
             ).date()
         except (ValueError, TypeError):
             selected_date = timezone.localdate()
@@ -340,13 +342,19 @@ class BulkAttendanceView(HODRequiredMixin, View):
         if status not in valid_statuses:
             return redirect(
                 f"{reverse_lazy('bulk-attendance', kwargs={'code': branch.code})}"
-                f"?edit={'1' if edit_mode else '0'}"
+                f"?date={selected_date}"
             )
 
-        students = Student.objects.filter(
-            branch=branch,
-            id__in=student_ids
-        )
+        # If no students are selected, use ALL students in this branch.
+        if student_ids:
+            students = Student.objects.filter(
+                branch=branch,
+                id__in=student_ids
+            )
+        else:
+            students = Student.objects.filter(
+                branch=branch
+            )
 
         is_sunday = selected_date.weekday() == 6
 
@@ -355,9 +363,13 @@ class BulkAttendanceView(HODRequiredMixin, View):
             and 8 <= selected_date.day <= 14
         )
 
-        # Sunday and second Saturday are always Weekend Holiday
+        # Sunday and second Saturday are always Weekend Holiday.
         if is_sunday or is_second_saturday:
             status = "Weekend Holiday"
+            is_extension_day = False
+
+        # Holiday and Weekend Holiday cannot be extension days.
+        if status in ["Holiday", "Weekend Holiday"]:
             is_extension_day = False
 
         for student in students:
