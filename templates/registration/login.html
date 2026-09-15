@@ -1,43 +1,402 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Login</title>
 
-<p>
-    <a href="{% url 'forgot_password' %}">Forgot Password?</a>
-</p>
+    <meta charset="UTF-8">
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>College Login</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4f46e5,
+                    #2563eb,
+                    #06b6d4
+                );
+
+            padding: 20px;
+        }
+
+
+        /* Main login box */
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+
+            background: rgba(255, 255, 255, 0.97);
+
+            border-radius: 22px;
+
+            padding: 38px 35px 32px;
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.25);
+
+            text-align: center;
+        }
+
+
+        /* Icon */
+
+        .login-icon {
+            width: 72px;
+            height: 72px;
+
+            margin: 0 auto 15px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 34px;
+
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #7c3aed
+            );
+
+            color: white;
+
+            box-shadow:
+                0 8px 20px rgba(37, 99, 235, 0.35);
+        }
+
+
+        /* Heading */
+
+        h1 {
+            margin: 0;
+
+            color: #172554;
+
+            font-size: 28px;
+
+            font-weight: 700;
+        }
+
+
+        .subtitle {
+            margin-top: 7px;
+            margin-bottom: 28px;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+
+        /* Form */
+
+        .form-group {
+            text-align: left;
+
+            margin-bottom: 18px;
+        }
+
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #334155;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        .form-group input {
+            width: 100%;
+
+            height: 46px;
+
+            padding: 0 14px;
+
+            border: 2px solid #e2e8f0;
+
+            border-radius: 10px;
+
+            outline: none;
+
+            font-size: 15px;
+
+            background: #f8fafc;
+
+            transition: 0.2s;
+        }
+
+
+        .form-group input:focus {
+            border-color: #3b82f6;
+
+            background: white;
+
+            box-shadow:
+                0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+
+        /* Login button */
+
+        .login-button {
+            width: 100%;
+
+            height: 48px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: linear-gradient(
+                90deg,
+                #2563eb,
+                #7c3aed
+            );
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+            box-shadow:
+                0 7px 16px rgba(37, 99, 235, 0.30);
+        }
+
+
+        .login-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 10px 22px rgba(37, 99, 235, 0.38);
+        }
+
+
+        /* Forgot password */
+
+        .forgot-password {
+            display: block;
+
+            margin-top: 17px;
+
+            color: #2563eb;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            text-decoration: none;
+        }
+
+
+        .forgot-password:hover {
+            color: #7c3aed;
+
+            text-decoration: underline;
+        }
+
+
+        /* Error message */
+
+        .error-message {
+            background: #fee2e2;
+
+            color: #b91c1c;
+
+            border: 1px solid #fecaca;
+
+            border-radius: 9px;
+
+            padding: 10px;
+
+            margin-bottom: 18px;
+
+            font-size: 13px;
+
+            text-align: left;
+        }
+
+
+        /* Bottom text */
+
+        .footer-text {
+            margin-top: 25px;
+
+            padding-top: 18px;
+
+            border-top: 1px solid #e2e8f0;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+
+        /* Mobile */
+
+        @media (max-width: 480px) {
+
+            .login-container {
+                padding: 30px 22px 25px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+        }
+
+    </style>
+
 </head>
 
-<body class="bg-light">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="text-center">
-                        College Login
-                    </h3>
+<body>
 
-                    <form method="post">
-                        {% csrf_token %}
 
-                        {{ form.as_p }}
+    <div class="login-container">
 
-                        <button class="btn btn-primary w-100">
-                            Login
-                        </button>
-                    </form>
-                </div>
-            </div>
+
+        <!-- Login icon -->
+
+        <div class="login-icon">
+            🎓
         </div>
+
+
+        <!-- Heading -->
+
+        <h1>
+            College Login
+        </h1>
+
+        <div class="subtitle">
+            Student Management System
+        </div>
+
+
+        <!-- Login errors -->
+
+        {% if form.errors %}
+
+            <div class="error-message">
+                Invalid username or password.
+                Please try again.
+            </div>
+
+        {% endif %}
+
+
+        <!-- Login form -->
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            <!-- Username -->
+
+            <div class="form-group">
+
+                <label for="id_username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    id="id_username"
+                    placeholder="Enter your username"
+                    required
+                    autofocus
+                >
+
+            </div>
+
+
+            <!-- Password -->
+
+            <div class="form-group">
+
+                <label for="id_password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    placeholder="Enter your password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Login -->
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Login
+            </button>
+
+
+            <!-- Forgot Password -->
+
+            <a
+                href="{% url 'forgot_password' %}"
+                class="forgot-password"
+            >
+                Forgot Password?
+            </a>
+
+
+        </form>
+
+
+        <div class="footer-text">
+            Student Management System
+        </div>
+
+
     </div>
-</div>
+
 
 </body>
+
 </html>
