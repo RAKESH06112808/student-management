@@ -2,70 +2,462 @@
 
 {% block content %}
 
-<h2>Dashboard</h2>
+<style>
+
+    .dashboard-title {
+        font-size: 30px;
+        font-weight: 800;
+        color: #172554;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 23px;
+        font-weight: 750;
+        color: #172554;
+        margin-top: 28px;
+        margin-bottom: 15px;
+    }
+
+    .summary-card {
+        border: none;
+        border-radius: 14px;
+        color: white;
+        box-shadow: 0 7px 20px rgba(30, 41, 59, 0.15);
+        transition: 0.25s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 11px 25px rgba(30, 41, 59, 0.20);
+    }
+
+    .summary-card .card-body {
+        padding: 20px 23px;
+    }
+
+    .summary-card h5 {
+        color: white;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .summary-card h2 {
+        color: white;
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .total-card {
+        background: linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+    }
+
+    .active-card {
+        background: linear-gradient(
+            135deg,
+            #059669,
+            #0d9488
+        );
+    }
+
+    .branch-card {
+        height: 125px;
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+
+        box-shadow: 0 5px 15px rgba(30, 41, 59, 0.10);
+
+        transition: 0.25s ease;
+    }
+
+    .branch-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 23px rgba(30, 41, 59, 0.17);
+    }
+
+    .branch-card-body {
+        height: 100%;
+        padding: 14px 16px;
+
+        display: flex;
+        align-items: center;
+    }
+
+    .branch-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+
+        border-radius: 12px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 22px;
+
+        margin-right: 13px;
+    }
+
+    .branch-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .branch-code {
+        font-size: 21px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .branch-name {
+        font-size: 12px;
+        line-height: 1.2;
+        margin-bottom: 5px;
+    }
+
+    .student-count {
+        font-size: 11px;
+        margin: 0;
+    }
+
+    .student-count strong {
+        font-size: 14px;
+    }
+
+    .open-btn {
+        margin-left: 10px;
+
+        padding: 7px 11px;
+
+        border-radius: 7px;
+
+        color: white !important;
+        text-decoration: none;
+
+        font-size: 11px;
+        font-weight: 700;
+
+        white-space: nowrap;
+
+        transition: 0.2s;
+    }
+
+    .open-btn:hover {
+        color: white !important;
+        opacity: 0.88;
+    }
+
+    /* CSE */
+
+    .branch-cse {
+        background: linear-gradient(
+            135deg,
+            #eff6ff,
+            #dbeafe
+        );
+    }
+
+    .branch-cse .branch-icon {
+        background: #bfdbfe;
+    }
+
+    .branch-cse .branch-code {
+        color: #1d4ed8;
+    }
+
+    .branch-cse .branch-name {
+        color: #334e68;
+    }
+
+    .branch-cse .open-btn {
+        background: #2563eb;
+    }
+
+    /* ECE */
+
+    .branch-ece {
+        background: linear-gradient(
+            135deg,
+            #ecfdf5,
+            #d1fae5
+        );
+    }
+
+    .branch-ece .branch-icon {
+        background: #a7f3d0;
+    }
+
+    .branch-ece .branch-code {
+        color: #047857;
+    }
+
+    .branch-ece .branch-name {
+        color: #365f58;
+    }
+
+    .branch-ece .open-btn {
+        background: #059669;
+    }
+
+    /* EEE */
+
+    .branch-eee {
+        background: linear-gradient(
+            135deg,
+            #f5f3ff,
+            #ede9fe
+        );
+    }
+
+    .branch-eee .branch-icon {
+        background: #ddd6fe;
+    }
+
+    .branch-eee .branch-code {
+        color: #6d28d9;
+    }
+
+    .branch-eee .branch-name {
+        color: #51456f;
+    }
+
+    .branch-eee .open-btn {
+        background: #7c3aed;
+    }
+
+    /* CIVIL */
+
+    .branch-civil {
+        background: linear-gradient(
+            135deg,
+            #fff7ed,
+            #ffedd5
+        );
+    }
+
+    .branch-civil .branch-icon {
+        background: #fed7aa;
+    }
+
+    .branch-civil .branch-code {
+        color: #c2410c;
+    }
+
+    .branch-civil .branch-name {
+        color: #6b4b35;
+    }
+
+    .branch-civil .open-btn {
+        background: #ea580c;
+    }
+
+    .bottom-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 8px 15px;
+    }
+
+    @media (max-width: 767px) {
+
+        .dashboard-title {
+            font-size: 25px;
+        }
+
+        .branch-card {
+            height: 120px;
+        }
+
+        .branch-card-body {
+            padding: 12px;
+        }
+
+        .branch-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            margin-right: 9px;
+            font-size: 19px;
+        }
+
+        .branch-code {
+            font-size: 18px;
+        }
+
+        .branch-name {
+            font-size: 10px;
+        }
+
+        .open-btn {
+            padding: 6px 8px;
+            font-size: 10px;
+        }
+    }
+
+</style>
+
+
+<h2 class="dashboard-title">
+    Dashboard
+</h2>
+
+
+<!-- TOP SUMMARY CARDS -->
 
 <div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card bg-primary text-white">
+
+    <div class="col-md-6 mb-3">
+
+        <div class="card summary-card total-card">
+
             <div class="card-body">
-                <h5>Total Students</h5>
-                <h2>{{ student_count }}</h2>
+
+                <h5>
+                    Total Students
+                </h5>
+
+                <h2>
+                    {{ student_count }}
+                </h2>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-6">
-        <div class="card bg-success text-white">
+
+    <div class="col-md-6 mb-3">
+
+        <div class="card summary-card active-card">
+
             <div class="card-body">
-                <h5>Active Students</h5>
-                <h2>{{ active_student_count }}</h2>
+
+                <h5>
+                    Active Students
+                </h5>
+
+                <h2>
+                    {{ active_student_count }}
+                </h2>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
-<h3 class="mt-5">Branch Statistics</h3>
 
-<table class="table table-bordered bg-white">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Branch</th>
-            <th>Students</th>
-        </tr>
-    </thead>
+<!-- BRANCH DASHBOARDS -->
 
-    <tbody>
-        {% for branch in branch_stats %}
-        <tr>
-            <td>{{ branch.code }}</td>
-            <td>
-                <a href="{% url 'branch-dashboard' branch.code %}">
-                    {{ branch.name }}
+<h3 class="section-title">
+    Branch Dashboards
+</h3>
+
+
+<div class="row">
+
+    {% for branch in branch_stats %}
+
+    <div class="col-lg-6 col-md-6 mb-3">
+
+        <div class="branch-card branch-{{ branch.code|lower }}">
+
+            <div class="branch-card-body">
+
+                <div class="branch-icon">
+
+                    {% if branch.code == "CSE" %}
+                        💻
+                    {% elif branch.code == "ECE" %}
+                        🔌
+                    {% elif branch.code == "EEE" %}
+                        ⚡
+                    {% elif branch.code == "CIVIL" %}
+                        🏗️
+                    {% else %}
+                        🎓
+                    {% endif %}
+
+                </div>
+
+
+                <div class="branch-info">
+
+                    <div class="branch-code">
+                        {{ branch.code }}
+                    </div>
+
+                    <div class="branch-name">
+                        {{ branch.name }}
+                    </div>
+
+                    <div class="student-count">
+                        Students:
+                        <strong>
+                            {{ branch.student_count }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="{% url 'branch-dashboard' branch.code %}"
+                    class="open-btn"
+                >
+                    Open →
                 </a>
-            </td>
-            <td>{{ branch.student_count }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3">No branches available.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
-<a
-    href="{% url 'student-create' %}"
-    class="btn btn-primary"
->
-    Add Student
-</a>
+            </div>
 
-<a
-    href="{% url 'student-list' %}"
-    class="btn btn-secondary"
->
-    View Students
-</a>
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="col-12">
+
+        <div class="alert alert-info">
+            No branches available.
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- BOTTOM BUTTONS -->
+
+<div class="mt-2">
+
+    <a
+        href="{% url 'student-create' %}"
+        class="btn btn-primary bottom-btn"
+    >
+        Add Student
+    </a>
+
+    <a
+        href="{% url 'student-list' %}"
+        class="btn btn-secondary bottom-btn"
+    >
+        View Students
+    </a>
+
+</div>
+
 
 {% endblock %}
