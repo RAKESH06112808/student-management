@@ -193,10 +193,9 @@ class DashboardView(HODRequiredMixin, TemplateView):
 
         context["branch_stats"] = Branch.objects.annotate(
             student_count=Count("students")
-        )
+        ).order_by("code")
 
         return context
-
 
 class StudentListView(HODRequiredMixin, ListView):
     model = Student
