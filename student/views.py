@@ -251,7 +251,16 @@ class StudentUpdateView(HODRequiredMixin, UpdateView):
     success_url = reverse_lazy("student-list")
 
     def form_valid(self, form):
+        print("BEFORE SAVE:", self.object.first_name)
+
         self.object = form.save()
+
+        print("AFTER SAVE:", self.object.first_name)
+
+        self.object.refresh_from_db()
+
+        print("AFTER REFRESH:", self.object.first_name)
+
         return super().form_valid(form)
 
 
