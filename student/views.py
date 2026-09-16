@@ -250,6 +250,10 @@ class StudentUpdateView(HODRequiredMixin, UpdateView):
     template_name = "students/student_form.html"
     success_url = reverse_lazy("student-list")
 
+    def form_valid(self, form):
+        self.object = form.save()
+        return super().form_valid(form)
+
 
 class StudentDeleteView(HODRequiredMixin, DeleteView):
     model = Student
