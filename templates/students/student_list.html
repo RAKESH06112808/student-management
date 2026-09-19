@@ -2,110 +2,863 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-3">
-    <h2>Students</h2>
+<style>
+    .students-page {
+        padding-bottom: 30px;
+    }
 
-    <a href="{% url 'students-pdf' %}">
-    📄 Download All Students PDF
-</a>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
 
-    <a
-        href="{% url 'student-create' %}"
-        class="btn btn-primary"
-    >
-        Add Student
-    </a>
+    .page-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+        color: #172554;
+    }
+
+    .page-subtitle {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .header-btn {
+        border-radius: 9px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s ease;
+    }
+
+    .pdf-btn {
+        background: #f8fafc;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+    }
+
+    .pdf-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .add-btn {
+        background: #2563eb;
+        color: white;
+        border: 1px solid #2563eb;
+    }
+
+    .add-btn:hover {
+        background: #1d4ed8;
+        color: white;
+    }
+        /* FILTER CARD */
+
+    .filter-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+    }
+
+    .filter-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: #172554;
+    }
+
+    .filter-hint {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .filter-input,
+    .filter-select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        padding: 9px 11px;
+        font-size: 13px;
+        color: #334155;
+        background: white;
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+        .search-btn {
+        min-height: 42px;
+        border: none;
+        border-radius: 9px;
+        padding: 9px 16px;
+        background: #2563eb;
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .clear-btn {
+        min-height: 42px;
+        border-radius: 9px;
+        padding: 9px 14px;
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    /* TABLE */
+
+    .table-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+    }
+
+    .table-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .table-header-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: #172554;
+    }
+
+    .result-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+        .student-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .student-table {
+        width: 100%;
+        min-width: 850px;
+        border-collapse: collapse;
+    }
+
+    .student-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 13px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .student-table tbody td {
+        padding: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .student-table tbody tr {
+        transition: 0.15s ease;
+    }
+
+    .student-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .student-name {
+        font-weight: 800;
+        color: #172554;
+    }
+
+    .admission-number {
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .roll-number {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .branch-badge {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #334155;
+        padding: 5px 9px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .semester-badge {
+        display: inline-block;
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding: 5px 9px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+        .status-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-graduated {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .status-discontinued {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-other {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        padding: 6px 9px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: 0.15s ease;
+    }
+
+    .view-btn {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+    }
+
+    .view-btn:hover {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .edit-btn {
+        background: #fefce8;
+        color: #854d0e;
+        border-color: #fde68a;
+    }
+
+    .edit-btn:hover {
+        background: #fef9c3;
+        color: #713f12;
+    }
+        .pdf-action-btn {
+        background: #f8fafc;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    .pdf-action-btn:hover {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 45px 20px;
+    }
+
+    .empty-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .empty-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: #172554;
+        margin-bottom: 5px;
+    }
+
+    .empty-text {
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    @media (max-width: 1100px) {
+        .filter-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-group.search-group {
+            grid-column: 1 / -1;
+        }
+
+        .filter-actions {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 23px;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-group.search-group,
+        .filter-actions {
+            grid-column: auto;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .search-btn,
+        .clear-btn {
+            flex: 1;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+<div class="students-page">
+
+    <div class="page-header">
+
+        <div>
+            <h2 class="page-title">Student Management</h2>
+            <p class="page-subtitle">
+                Search, filter and manage registered students.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a href="{% url 'students-pdf' %}"
+               class="header-btn pdf-btn">
+                📄 Download PDF
+            </a>
+
+            <a href="{% url 'student-create' %}"
+               class="header-btn add-btn">
+                ➕ Add Student
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="filter-card">
+
+        <div class="filter-top">
+
+            <div>
+                <h3 class="filter-title">Search & Filters</h3>
+                <span class="filter-hint">
+                    Narrow down the student list using the options below.
+                </span>
+            </div>
+
+        </div>
+
+        <form method="get">
+
+            <div class="filter-grid">
+                                <div class="filter-group search-group">
+
+                    <label class="filter-label">
+                        Search
+                    </label>
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request.GET.q }}"
+                        class="filter-input"
+                        placeholder="Admission no., roll no., name or phone"
+                    >
+
+                </div>
+
+
+                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Branch
+                    </label>
+
+                    <select name="branch" class="filter-select">
+
+                        <option value="">
+                            All Branches
+                        </option>
+
+                        {% for branch in branches %}
+
+                        <option
+                            value="{{ branch.code }}"
+                            {% if request.GET.branch == branch.code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ branch.code }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Status
+                    </label>
+
+                    <select name="status" class="filter-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Active"
+                            {% if request.GET.status == "Active" %}
+                                selected
+                            {% endif %}>
+                            Active
+                        </option>
+
+                        <option value="Graduated"
+                            {% if request.GET.status == "Graduated" %}
+                                selected
+                            {% endif %}>
+                            Graduated
+                        </option>
+
+                        <option value="Discontinued"
+                            {% if request.GET.status == "Discontinued" %}
+                                selected
+                            {% endif %}>
+                            Discontinued
+                        </option>
+
+                    </select>
+
+                </div>
+                                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Semester
+                    </label>
+
+                    <select name="semester" class="filter-select">
+
+                        <option value="">
+                            All Semesters
+                        </option>
+
+                        {% for number in "12345678" %}
+
+                        <option
+                            value="{{ number }}"
+                            {% if request.GET.semester == number %}
+                                selected
+                            {% endif %}
+                        >
+                            Semester {{ number }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-actions">
+
+                    <button type="submit"
+                            class="search-btn">
+                        🔎 Search
+                    </button>
+
+                    <a href="{% url 'student-list' %}"
+                       class="clear-btn">
+                        Clear
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <h3 class="table-header-title">
+                Student Records
+            </h3>
+
+            <span class="result-count">
+                👥 {{ students|length }} Students
+            </span>
+
+        </div>
+
+        <div class="student-table-wrapper">
+
+            <table class="student-table">
+
+                <thead>
+                    <tr>
+                        <th>Admission No.</th>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+                        <th>Branch</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                                    <div class="filter-group">
+
+                    <label class="filter-label">
+                        Semester
+                    </label>
+
+                    <select name="semester" class="filter-select">
+
+                        <option value="">
+                            All Semesters
+                        </option>
+
+                        {% for number in "12345678" %}
+
+                        <option
+                            value="{{ number }}"
+                            {% if request.GET.semester == number %}
+                                selected
+                            {% endif %}
+                        >
+                            Semester {{ number }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-actions">
+
+                    <button type="submit"
+                            class="search-btn">
+                        🔎 Search
+                    </button>
+
+                    <a href="{% url 'student-list' %}"
+                       class="clear-btn">
+                        Clear
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <h3 class="table-header-title">
+                Student Records
+            </h3>
+
+            <span class="result-count">
+                👥 {{ students|length }} Students
+            </span>
+
+        </div>
+
+        <div class="student-table-wrapper">
+
+            <table class="student-table">
+
+                <thead>
+                    <tr>
+                        <th>Admission No.</th>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+                        <th>Branch</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    
+                    
+                    {% for student in students %}
+
+                    <tr>
+
+                        <td>
+                            <span class="admission-number">
+                                {{ student.admission_no }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="roll-number">
+                                {{ student.roll_no }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="student-name">
+                                {{ student.first_name }}
+                                {{ student.last_name }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="branch-badge">
+                                {{ student.branch.code }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="semester-badge">
+                                Semester {{ student.current_semester }}
+                            </span>
+                        </td>
+
+                        <td>
+
+                            {% if student.status == "Active" %}
+
+                                <span class="status-badge status-active">
+                                    Active
+                                </span>
+
+                            {% elif student.status == "Graduated" %}
+
+                                <span class="status-badge status-graduated">
+                                    Graduated
+                                </span>
+
+                            {% elif student.status == "Discontinued" %}
+
+                                <span class="status-badge status-discontinued">
+                                    Discontinued
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge status-other">
+                                    {{ student.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="action-group">
+
+                                <a href="{% url 'student-detail' student.pk %}"
+                                   class="action-btn view-btn">
+                                    View
+                                </a>
+
+                                <a href="{% url 'student-update' student.pk %}"
+                                   class="action-btn edit-btn">
+                                    Edit
+                                </a>
+
+                                <a href="{% url 'student-pdf' student.pk %}"
+                                   class="action-btn pdf-action-btn">
+                                    PDF
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="7">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    🔍
+                                </div>
+
+                                <div class="empty-title">
+                                    No Students Found
+                                </div>
+
+                                <div class="empty-text">
+                                    Try changing your search or filter options.
+                                </div>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </div>
 
-<form method="get" class="card card-body mb-4">
-    <div class="row">
-        <div class="col-md-5">
-            <input
-                type="text"
-                name="q"
-                class="form-control"
-                placeholder="Search by name, roll number..."
-                value="{{ request.GET.q }}"
-            >
-        </div>
-
-        <div class="col-md-4">
-            <select name="branch" class="form-select">
-                <option value="">All Branches</option>
-
-                {% for branch in branches %}
-                <option value="{{ branch.code }}">
-                    {{ branch.code }} - {{ branch.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="col-md-3">
-            <button class="btn btn-dark w-100">
-                Search
-            </button>
-        </div>
-    </div>
-</form>
-
-<table class="table table-bordered table-hover bg-white">
-    <thead class="table-dark">
-        <tr>
-            <th>Admission No.</th>
-            <th>Roll No.</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Semester</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for student in students %}
-        <tr>
-            <td>{{ student.admission_no }}</td>
-            <td>{{ student.roll_no }}</td>
-            <td>
-                {{ student.first_name }}
-                {{ student.last_name }}
-            </td>
-            <td>{{ student.branch.code }}</td>
-            <td>{{ student.current_semester }}</td>
-            <td>{{ student.status }}</td>
-            <td>
-                <a
-                    href="{% url 'student-detail' student.id %}"
-                    class="btn btn-info btn-sm"
-                >
-                    View
-                </a>
-
-                <a
-                    href="{% url 'student-update' student.id %}"
-                    class="btn btn-warning btn-sm"
-                >
-                    Edit
-                </a>
-
-                <a
-    href="{% url 'student-pdf' student.id %}"
-    class="btn btn-secondary btn-sm"
->
- PDF
-</a>
-            </td>
-        </tr>
-
-        {% empty %}
-        <tr>
-            <td colspan="7" class="text-center">
-                No students found.
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 {% endblock %}
+                

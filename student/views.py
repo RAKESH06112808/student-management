@@ -8,6 +8,7 @@ from django.http import HttpResponse
 
 from twilio.rest import Client
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
@@ -208,7 +209,10 @@ class StudentListView(HODRequiredMixin, ListView):
 
         search = self.request.GET.get("q", "").strip()
         branch = self.request.GET.get("branch", "").strip()
+        status = self.request.GET.get("status", "").strip()
+        semester = self.request.GET.get("semester", "").strip()
 
+        # Search
         if search:
             students = students.filter(
                 Q(admission_no__icontains=search)
@@ -218,10 +222,17 @@ class StudentListView(HODRequiredMixin, ListView):
                 | Q(phone__icontains=search)
             )
 
+        # Branch filter
         if branch:
-            students = students.filter(
-                branch__code=branch
-            )
+            students = students.filter(branch__code=branch)
+
+        # Status filter
+        if status:
+            students = students.filter(status=status)
+
+        # Semester filter
+        if semester:
+            students = students.filter(current_semester=semester)
 
         return students
 
@@ -243,12 +254,34 @@ class StudentCreateView(HODRequiredMixin, CreateView):
     template_name = "students/student_form.html"
     success_url = reverse_lazy("student-list")
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        messages.success(
+            self.request,
+            f"Student {self.object.first_name} {self.object.last_name} was added successfully."
+        )
+
+        return response
+
+    
 
 class StudentUpdateView(HODRequiredMixin, UpdateView):
     model = Student
     form_class = StudentForm
     template_name = "students/student_form.html"
     success_url = reverse_lazy("student-list")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        messages.success(
+            self.request,
+            f"Student {self.object.first_name} {self.object.last_name} was updated successfully."
+        )
+
+        return response
+    
 
     
 
@@ -257,6 +290,17 @@ class StudentDeleteView(HODRequiredMixin, DeleteView):
     template_name = "students/student_confirm_delete.html"
     success_url = reverse_lazy("student-list")
 
+    def form_valid(self, form):
+        student_name = f"{self.object.first_name} {self.object.last_name}"
+
+        response = super().form_valid(form)
+
+        messages.success(
+            self.request,
+            f"Student {student_name} was deleted successfully."
+        )
+
+        return response
 
 class BranchDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "students/branch_dashboard.html"

@@ -3,106 +3,165 @@
 {% block content %}
 
 <style>
+    .dashboard-wrapper {
+        padding-bottom: 30px;
+    }
 
-    .dashboard-title {
-        font-size: 30px;
+    .welcome-box {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        color: white;
+        border-radius: 18px;
+        padding: 24px 26px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.20);
+    }
+
+    .welcome-box h2 {
+        margin: 0;
+        font-size: 28px;
         font-weight: 800;
-        color: #172554;
-        margin-bottom: 0;
+    }
+
+    .welcome-box p {
+        margin: 7px 0 0;
+        opacity: 0.90;
+        font-size: 14px;
     }
 
     .section-title {
-        font-size: 23px;
-        font-weight: 750;
         color: #172554;
-        margin-top: 28px;
-        margin-bottom: 15px;
+        font-size: 21px;
+        font-weight: 800;
+        margin: 28px 0 15px;
     }
 
     .summary-card {
         border: none;
-        border-radius: 14px;
+        border-radius: 16px;
         color: white;
-        box-shadow: 0 7px 20px rgba(30, 41, 59, 0.15);
+        overflow: hidden;
+        box-shadow: 0 7px 20px rgba(15, 23, 42, 0.12);
         transition: 0.25s ease;
     }
 
     .summary-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 11px 25px rgba(30, 41, 59, 0.20);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
     }
 
     .summary-card .card-body {
-        padding: 20px 23px;
+        padding: 21px;
     }
 
-    .summary-card h5 {
-        color: white;
-        font-size: 16px;
-        margin-bottom: 5px;
+    .summary-label {
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0.9;
+        margin-bottom: 7px;
     }
 
-    .summary-card h2 {
-        color: white;
-        font-size: 30px;
+    .summary-number {
+        font-size: 34px;
         font-weight: 800;
-        margin: 0;
+        line-height: 1;
+    }
+
+    .summary-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        background: rgba(255,255,255,0.18);
+        margin-bottom: 12px;
     }
 
     .total-card {
-        background: linear-gradient(
-            135deg,
-            #2563eb,
-            #4f46e5
-        );
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
     }
 
     .active-card {
-        background: linear-gradient(
-            135deg,
-            #059669,
-            #0d9488
-        );
+        background: linear-gradient(135deg, #059669, #0d9488);
+    }
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        text-decoration: none;
+        color: #172554;
+        box-shadow: 0 4px 13px rgba(15, 23, 42, 0.06);
+        transition: 0.25s ease;
+        height: 100%;
+    }
+
+    .quick-action:hover {
+        transform: translateY(-3px);
+        color: #172554;
+        box-shadow: 0 9px 22px rgba(15, 23, 42, 0.12);
+        text-decoration: none;
+    }
+
+    .quick-icon {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        background: #eff6ff;
+    }
+
+    .quick-action h6 {
+        margin: 0 0 3px;
+        font-weight: 750;
+        font-size: 14px;
+    }
+
+    .quick-action small {
+        color: #64748b;
+        font-size: 11px;
     }
 
     .branch-card {
-        height: 125px;
+        height: 135px;
         border: none;
-        border-radius: 14px;
+        border-radius: 16px;
         overflow: hidden;
-
-        box-shadow: 0 5px 15px rgba(30, 41, 59, 0.10);
-
+        box-shadow: 0 5px 16px rgba(15, 23, 42, 0.08);
         transition: 0.25s ease;
     }
 
     .branch-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 10px 23px rgba(30, 41, 59, 0.17);
+        box-shadow: 0 11px 25px rgba(15, 23, 42, 0.15);
     }
 
     .branch-card-body {
         height: 100%;
-        padding: 14px 16px;
-
+        padding: 16px;
         display: flex;
         align-items: center;
     }
 
     .branch-icon {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-
-        border-radius: 12px;
-
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-
-        font-size: 22px;
-
-        margin-right: 13px;
+        font-size: 23px;
+        margin-right: 14px;
     }
 
     .branch-info {
@@ -111,21 +170,20 @@
     }
 
     .branch-code {
-        font-size: 21px;
+        font-size: 22px;
         font-weight: 800;
         line-height: 1;
         margin-bottom: 5px;
     }
 
     .branch-name {
-        font-size: 12px;
-        line-height: 1.2;
-        margin-bottom: 5px;
+        font-size: 11px;
+        line-height: 1.25;
+        margin-bottom: 6px;
     }
 
     .student-count {
         font-size: 11px;
-        margin: 0;
     }
 
     .student-count strong {
@@ -133,36 +191,24 @@
     }
 
     .open-btn {
-        margin-left: 10px;
-
-        padding: 7px 11px;
-
-        border-radius: 7px;
-
+        margin-left: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
         color: white !important;
         text-decoration: none;
-
         font-size: 11px;
         font-weight: 700;
-
         white-space: nowrap;
-
         transition: 0.2s;
     }
 
     .open-btn:hover {
         color: white !important;
-        opacity: 0.88;
+        opacity: 0.85;
+        text-decoration: none;
     }
-
-    /* CSE */
-
-    .branch-cse {
-        background: linear-gradient(
-            135deg,
-            #eff6ff,
-            #dbeafe
-        );
+        .branch-cse {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
     }
 
     .branch-cse .branch-icon {
@@ -181,14 +227,8 @@
         background: #2563eb;
     }
 
-    /* ECE */
-
     .branch-ece {
-        background: linear-gradient(
-            135deg,
-            #ecfdf5,
-            #d1fae5
-        );
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
     }
 
     .branch-ece .branch-icon {
@@ -207,14 +247,8 @@
         background: #059669;
     }
 
-    /* EEE */
-
     .branch-eee {
-        background: linear-gradient(
-            135deg,
-            #f5f3ff,
-            #ede9fe
-        );
+        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
     }
 
     .branch-eee .branch-icon {
@@ -233,14 +267,8 @@
         background: #7c3aed;
     }
 
-    /* CIVIL */
-
     .branch-civil {
-        background: linear-gradient(
-            135deg,
-            #fff7ed,
-            #ffedd5
-        );
+        background: linear-gradient(135deg, #fff7ed, #ffedd5);
     }
 
     .branch-civil .branch-icon {
@@ -259,20 +287,23 @@
         background: #ea580c;
     }
 
-    .bottom-btn {
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 8px 15px;
-    }
-
     @media (max-width: 767px) {
 
-        .dashboard-title {
-            font-size: 25px;
+        .welcome-box {
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .welcome-box h2 {
+            font-size: 23px;
+        }
+
+        .summary-number {
+            font-size: 29px;
         }
 
         .branch-card {
-            height: 120px;
+            height: 125px;
         }
 
         .branch-card-body {
@@ -280,10 +311,10 @@
         }
 
         .branch-icon {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-            margin-right: 9px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            margin-right: 10px;
             font-size: 19px;
         }
 
@@ -300,123 +331,72 @@
             font-size: 10px;
         }
     }
-
 </style>
 
 
-<h2 class="dashboard-title">
-    Dashboard
-</h2>
+<div class="dashboard-wrapper">
 
+    <div class="welcome-box">
 
-<!-- TOP SUMMARY CARDS -->
+        <h2>Welcome to College Management System 👋</h2>
 
-<div class="row mt-4">
-
-    <div class="col-md-6 mb-3">
-
-        <div class="card summary-card total-card">
-
-            <div class="card-body">
-
-                <h5>
-                    Total Students
-                </h5>
-
-                <h2>
-                    {{ student_count }}
-                </h2>
-
-            </div>
-
-        </div>
+        <p>
+            Manage students, branches and academic information from one place.
+        </p>
 
     </div>
 
 
-    <div class="col-md-6 mb-3">
+    <h3 class="section-title">
+        Overview
+    </h3>
 
-        <div class="card summary-card active-card">
+    <div class="row">
 
-            <div class="card-body">
+        <div class="col-md-6 mb-3">
 
-                <h5>
-                    Active Students
-                </h5>
+            <div class="card summary-card total-card">
 
-                <h2>
-                    {{ active_student_count }}
-                </h2>
+                <div class="card-body">
 
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- BRANCH DASHBOARDS -->
-
-<h3 class="section-title">
-    Branch Dashboards
-</h3>
-
-
-<div class="row">
-
-    {% for branch in branch_stats %}
-
-    <div class="col-lg-6 col-md-6 mb-3">
-
-        <div class="branch-card branch-{{ branch.code|lower }}">
-
-            <div class="branch-card-body">
-
-                <div class="branch-icon">
-
-                    {% if branch.code == "CSE" %}
-                        💻
-                    {% elif branch.code == "ECE" %}
-                        🔌
-                    {% elif branch.code == "EEE" %}
-                        ⚡
-                    {% elif branch.code == "CIVIL" %}
-                        🏗️
-                    {% else %}
-                        🎓
-                    {% endif %}
-
-                </div>
-
-
-                <div class="branch-info">
-
-                    <div class="branch-code">
-                        {{ branch.code }}
+                    <div class="summary-icon">
+                        👨‍🎓
                     </div>
 
-                    <div class="branch-name">
-                        {{ branch.name }}
+                    <div class="summary-label">
+                        Total Students
                     </div>
 
-                    <div class="student-count">
-                        Students:
-                        <strong>
-                            {{ branch.student_count }}
-                        </strong>
+                    <div class="summary-number">
+                        {{ student_count }}
                     </div>
 
                 </div>
 
+            </div>
 
-                <a
-                    href="{% url 'branch-dashboard' branch.code %}"
-                    class="open-btn"
-                >
-                    Open →
-                </a>
+        </div>
+
+
+        <div class="col-md-6 mb-3">
+
+            <div class="card summary-card active-card">
+
+                <div class="card-body">
+
+                    <div class="summary-icon">
+                        ✓
+                    </div>
+
+                    <div class="summary-label">
+                        Active Students
+                    </div>
+
+                    <div class="summary-number">
+                        {{ active_student_count }}
+                    </div>
+
+                </div>
 
             </div>
 
@@ -424,40 +404,143 @@
 
     </div>
 
-    {% empty %}
 
-    <div class="col-12">
+    <h3 class="section-title">
+        Quick Actions
+    </h3>
 
-        <div class="alert alert-info">
-            No branches available.
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+
+            <a href="{% url 'student-create' %}" class="quick-action">
+
+                <div class="quick-icon">
+                    ➕
+                </div>
+
+                <div>
+                    <h6>Add Student</h6>
+                    <small>Create a new student record</small>
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+
+            <a href="{% url 'student-list' %}" class="quick-action">
+
+                <div class="quick-icon">
+                    👥
+                </div>
+
+                <div>
+                    <h6>View Students</h6>
+                    <small>Search and manage students</small>
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+
+            <a href="{% url 'student-list' %}" class="quick-action">
+
+                <div class="quick-icon">
+                    📋
+                </div>
+
+                <div>
+                    <h6>Student Records</h6>
+                    <small>Access complete student information</small>
+                </div>
+
+            </a>
+
         </div>
 
     </div>
+        <h3 class="section-title">
+        Branch Dashboards
+    </h3>
 
-    {% endfor %}
+    <div class="row">
+
+        {% for branch in branch_stats %}
+
+        <div class="col-lg-6 col-md-6 mb-3">
+
+            <div class="branch-card branch-{{ branch.code|lower }}">
+
+                <div class="branch-card-body">
+
+                    <div class="branch-icon">
+
+                        {% if branch.code == "CSE" %}
+                            💻
+                        {% elif branch.code == "ECE" %}
+                            🔌
+                        {% elif branch.code == "EEE" %}
+                            ⚡
+                        {% elif branch.code == "CIVIL" %}
+                            🏗️
+                        {% else %}
+                            🎓
+                        {% endif %}
+
+                    </div>
+
+                    <div class="branch-info">
+
+                        <div class="branch-code">
+                            {{ branch.code }}
+                        </div>
+
+                        <div class="branch-name">
+                            {{ branch.name }}
+                        </div>
+
+                        <div class="student-count">
+                            Students:
+                            <strong>
+                                {{ branch.student_count }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'branch-dashboard' branch.code %}"
+                        class="open-btn"
+                    >
+                        Open →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-info">
+                No branches available.
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
 
 </div>
-
-
-<!-- BOTTOM BUTTONS -->
-
-<div class="mt-2">
-
-    <a
-        href="{% url 'student-create' %}"
-        class="btn btn-primary bottom-btn"
-    >
-        Add Student
-    </a>
-
-    <a
-        href="{% url 'student-list' %}"
-        class="btn btn-secondary bottom-btn"
-    >
-        View Students
-    </a>
-
-</div>
-
 
 {% endblock %}

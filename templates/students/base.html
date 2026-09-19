@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Student Management System</title>
@@ -12,107 +15,241 @@
     >
 
     <style>
-        /* ==============================
-           GLOBAL THEME
-        ============================== */
+
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
             min-height: 100vh;
-            background: linear-gradient(
-                135deg,
-                #f4f7ff,
-                #eef2ff,
-                #f8faff
-            );
+            background: #f4f7fb;
             font-family: "Segoe UI", Arial, sans-serif;
             color: #172554;
         }
 
-
         /* ==============================
-           NAVBAR
+           SIDEBAR
         ============================== */
 
-        .main-navbar {
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 245px;
+            height: 100vh;
+
             background: linear-gradient(
-                135deg,
+                180deg,
                 #172554,
-                #312e81,
-                #1d4ed8
+                #1e1b4b,
+                #312e81
             );
 
-            padding: 16px 0;
+            color: white;
+            padding: 22px 15px;
 
             box-shadow:
-                0 4px 18px rgba(30, 41, 59, 0.25);
+                4px 0 20px rgba(15, 23, 42, 0.15);
 
-            position: relative;
-            z-index: 10;
+            z-index: 1000;
         }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
 
-        .brand-title {
             color: white !important;
-            font-size: 22px;
-            font-weight: 700;
             text-decoration: none;
 
-            letter-spacing: 0.3px;
+            font-size: 19px;
+            font-weight: 800;
 
-            transition: 0.3s;
+            padding: 10px 8px 22px;
+
+            border-bottom:
+                1px solid rgba(255,255,255,0.12);
+
+            margin-bottom: 20px;
         }
 
-        .brand-title:hover {
-            opacity: 0.9;
-            transform: translateX(2px);
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+
+            border-radius: 11px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255,255,255,0.14);
+
+            font-size: 21px;
+        }
+
+        .brand-text {
+            line-height: 1.15;
+        }
+
+        .brand-subtitle {
+            display: block;
+
+            font-size: 10px;
+            font-weight: 400;
+
+            opacity: 0.65;
+
+            margin-top: 4px;
         }
 
 
         /* ==============================
-           NAVIGATION LINKS
+           SIDEBAR SECTION
         ============================== */
 
-        .nav-link-custom {
-            color: #ffffff !important;
-            text-decoration: none;
+        .sidebar-section {
+            color: #a5b4fc;
 
-            font-size: 15px;
-            font-weight: 500;
+            font-size: 10px;
+            font-weight: 700;
 
-            margin-right: 18px;
+            text-transform: uppercase;
 
-            transition: 0.3s;
-        }
+            letter-spacing: 1px;
 
-        .nav-link-custom:hover {
-            color: #c7d2fe !important;
+            padding: 0 12px;
+
+            margin-bottom: 8px;
         }
 
 
         /* ==============================
-           LOGOUT BUTTON
+           SIDEBAR LINKS
+        ============================== */
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            width: 100%;
+
+            padding: 11px 12px;
+
+            margin-bottom: 5px;
+
+            border-radius: 10px;
+
+            color: #e0e7ff !important;
+
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 500;
+
+            transition: 0.25s ease;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(255,255,255,0.10);
+
+            color: white !important;
+
+            transform: translateX(3px);
+
+            text-decoration: none;
+        }
+
+        .sidebar-icon {
+            width: 24px;
+
+            text-align: center;
+
+            font-size: 17px;
+        }
+
+
+        /* ==============================
+           SIDEBAR USER
+        ============================== */
+
+        .sidebar-user {
+            position: absolute;
+
+            left: 15px;
+            right: 15px;
+            bottom: 18px;
+
+            padding: 13px;
+
+            border-radius: 12px;
+
+            background: rgba(255,255,255,0.08);
+
+            border:
+                1px solid rgba(255,255,255,0.10);
+        }
+
+        .user-role {
+            color: #c7d2fe;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.8px;
+
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            margin-bottom: 10px;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        /* ==============================
+           LOGOUT
         ============================== */
 
         .logout-btn {
-            background: rgba(255, 255, 255, 0.15);
+            width: 100%;
+
+            background: rgba(255,255,255,0.10);
+
             color: white;
 
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            border:
+                1px solid rgba(255,255,255,0.18);
 
             border-radius: 8px;
 
-            padding: 6px 15px;
+            padding: 7px 10px;
 
-            font-size: 14px;
+            font-size: 12px;
+
             font-weight: 600;
 
-            transition: 0.3s;
+            transition: 0.25s ease;
         }
 
         .logout-btn:hover {
             background: white;
+
             color: #312e81;
+
             transform: translateY(-1px);
         }
 
@@ -121,9 +258,54 @@
            MAIN CONTENT
         ============================== */
 
-        .main-container {
-            padding-top: 28px;
-            padding-bottom: 40px;
+        .main-content {
+            margin-left: 245px;
+
+            min-height: 100vh;
+
+            padding: 28px 32px 45px;
+        }
+
+
+        /* ==============================
+           TOP MOBILE BAR
+        ============================== */
+
+        .mobile-header {
+            display: none;
+
+            background: linear-gradient(
+                135deg,
+                #172554,
+                #312e81
+            );
+
+            color: white;
+
+            padding: 13px 16px;
+
+            align-items: center;
+
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .mobile-menu-btn {
+            border: none;
+
+            background: rgba(255,255,255,0.12);
+
+            color: white;
+
+            border-radius: 8px;
+
+            padding: 6px 10px;
+
+            font-size: 18px;
         }
 
 
@@ -133,19 +315,18 @@
 
         .card {
             border: none;
+
             border-radius: 16px;
 
             box-shadow:
                 0 8px 25px rgba(30, 41, 59, 0.08);
 
-            transition: 0.3s;
+            transition: 0.25s ease;
         }
 
         .card:hover {
-            transform: translateY(-3px);
-
             box-shadow:
-                0 12px 30px rgba(30, 41, 59, 0.14);
+                0 12px 30px rgba(30, 41, 59, 0.13);
         }
 
 
@@ -159,6 +340,7 @@
         h4,
         h5 {
             color: #172554;
+
             font-weight: 700;
         }
 
@@ -194,18 +376,15 @@
             );
 
             transform: translateY(-1px);
-
-            box-shadow:
-                0 6px 16px rgba(37, 99, 235, 0.35);
         }
 
-
-        /* ==============================
+                /* ==============================
            TABLE
         ============================== */
 
         .table {
             border-radius: 12px;
+
             overflow: hidden;
 
             background: white;
@@ -229,94 +408,447 @@
 
 
         /* ==============================
-           RESPONSIVE
+           MOBILE
         ============================== */
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
 
-            .brand-title {
-                font-size: 18px;
+            .sidebar {
+                width: 220px;
             }
 
-            .nav-link-custom {
-                margin-right: 8px;
-                font-size: 14px;
-            }
+            .main-content {
+                margin-left: 220px;
 
-            .main-container {
-                padding-top: 20px;
+                padding: 22px;
             }
         }
 
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+
+                padding: 20px 15px 35px;
+            }
+
+            .brand-text {
+                font-size: 16px;
+            }
+        }
+/* TOAST NOTIFICATIONS */
+
+.toast-container-custom {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    width: min(380px, calc(100vw - 30px));
+}
+
+.toast-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    animation: toastSlideIn 0.35s ease;
+}
+
+.toast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #172554;
+    margin-bottom: 3px;
+}
+
+.toast-text {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.toast-close {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.toast-close:hover {
+    color: #334155;
+}
+
+/* SUCCESS */
+
+.toast-success {
+    border-left: 4px solid #16a34a;
+}
+
+.toast-success .toast-icon {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* ERROR */
+
+.toast-error {
+    border-left: 4px solid #dc2626;
+}
+
+.toast-error .toast-icon {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* WARNING */
+
+.toast-warning {
+    border-left: 4px solid #d97706;
+}
+
+.toast-warning .toast-icon {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* INFO */
+
+.toast-info {
+    border-left: 4px solid #2563eb;
+}
+
+.toast-info .toast-icon {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+.toast-hide {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+@media (max-width: 576px) {
+    .toast-container-custom {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+    }
+}
     </style>
+
 </head>
 
 
 <body>
 
-    <!-- ==============================
-         NAVBAR
-    ============================== -->
+    <!-- TOAST NOTIFICATIONS -->
 
-    <nav class="main-navbar">
+{% if messages %}
 
-        <div class="container d-flex justify-content-between align-items-center">
+<div class="toast-container-custom">
 
-            <!-- Brand -->
+    {% for message in messages %}
 
-            <a
-                class="brand-title"
-                href="{% url 'dashboard' %}"
-            >
-                🎓 Student Management System
-            </a>
+        <div class="toast-message toast-{{ message.tags }}">
 
+            <div class="toast-icon">
 
-            <!-- Navigation -->
+                {% if message.tags == "success" %}
+                    ✓
+                {% elif message.tags == "error" %}
+                    !
+                {% elif message.tags == "warning" %}
+                    !
+                {% else %}
+                    i
+                {% endif %}
 
-            {% if user.is_authenticated %}
+            </div>
 
-                <div class="d-flex align-items-center">
+            <div class="toast-content">
 
-                    <a
-                        class="nav-link-custom"
-                        href="{% url 'student-list' %}"
-                    >
-                        Students
-                    </a>
+                <div class="toast-title">
 
-
-                    <form
-                        method="post"
-                        action="{% url 'logout' %}"
-                        style="display: inline;"
-                    >
-
-                        {% csrf_token %}
-
-                        <button
-                            type="submit"
-                            class="logout-btn"
-                        >
-                            Logout
-                        </button>
-
-                    </form>
+                    {% if message.tags == "success" %}
+                        Success
+                    {% elif message.tags == "error" %}
+                        Error
+                    {% elif message.tags == "warning" %}
+                        Warning
+                    {% else %}
+                        Information
+                    {% endif %}
 
                 </div>
 
-            {% endif %}
+                <div class="toast-text">
+                    {{ message }}
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="toast-close"
+                onclick="this.parentElement.remove();"
+                aria-label="Close">
+                ×
+            </button>
 
         </div>
 
-    </nav>
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
+
 
 
     <!-- ==============================
+         SIDEBAR
+    ============================== -->
+
+    <aside class="sidebar">
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="brand"
+        >
+
+            <div class="brand-icon">
+                🎓
+            </div>
+
+            <div class="brand-text">
+
+                Student Management
+
+                <span class="brand-subtitle">
+                    College Management System
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <div class="sidebar-section">
+            Main Menu
+        </div>
+
+
+        {% if user.is_authenticated %}
+
+
+            {% if user.is_superuser %}
+
+                <a
+                    href="{% url 'dashboard' %}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        🏠
+                    </span>
+
+                    Dashboard
+
+                </a>
+
+
+                <a
+                    href="{% url 'student-list' %}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        👥
+                    </span>
+
+                    Students
+
+                </a>
+
+
+            {% else %}
+
+                <a
+                    href="{% url 'my-profile' %}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        👤
+                    </span>
+
+                    My Profile
+
+                </a>
+
+
+                <a
+                    href="{% url 'my-attendance' %}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        📅
+                    </span>
+
+                    My Attendance
+
+                </a>
+
+            {% endif %}
+
+
+        {% endif %}
+
+
+        <div class="sidebar-section mt-4">
+            Account
+        </div>
+
+
+        {% if user.is_authenticated %}
+
+            <div class="sidebar-link">
+
+                <span class="sidebar-icon">
+                    🔐
+                </span>
+
+                {% if user.is_superuser %}
+                    HOD / Admin
+                {% else %}
+                    Student
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        {% if user.is_authenticated %}
+
+            <div class="sidebar-user">
+
+                <div class="user-role">
+                    Logged in as
+                </div>
+
+                <div class="user-name">
+                    {{ user.username }}
+                </div>
+
+
+                <form
+                    method="post"
+                    action="{% url 'logout' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="logout-btn"
+                    >
+                        🚪 Logout
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endif %}
+
+    </aside>
+
+
+    <!-- ==============================
+         MOBILE HEADER
+    ============================== -->
+
+    <div class="mobile-header">
+
+        <div class="mobile-brand">
+            🎓 Student Management
+        </div>
+
+        <button
+            class="mobile-menu-btn"
+            type="button"
+            onclick="alert('Please use desktop view for the full navigation menu.')"
+        >
+            ☰
+        </button>
+
+    </div>
+
+        <!-- ==============================
          MAIN CONTENT
     ============================== -->
 
-    <main class="container main-container">
+    <main class="main-content">
 
         {% block content %}
 
@@ -325,5 +857,20 @@
     </main>
 
 
+<script>
+    setTimeout(function () {
+        const toasts = document.querySelectorAll(".toast-message");
+
+        toasts.forEach(function (toast) {
+            toast.classList.add("toast-hide");
+
+            setTimeout(function () {
+                toast.remove();
+            }, 300);
+        });
+
+    }, 4000);
+</script>
 </body>
+
 </html>
