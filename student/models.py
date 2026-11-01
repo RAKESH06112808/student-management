@@ -109,6 +109,23 @@ class HODProfile(models.Model):
     def __str__(self):
         return f"HOD Profile - {self.user.username}"
 
+    
+class FacultyProfile(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="faculty_profile"
+    )
+
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.PROTECT,
+        related_name="faculty_members"
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.branch.code}"
+
 class Attendance(models.Model):
     STATUS_CHOICES = [
         ("Present", "Present"),

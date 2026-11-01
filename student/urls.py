@@ -136,4 +136,22 @@ urlpatterns = [
         download_my_profile_pdf,
         name="my-profile-pdf"
     ),
+
+path(
+    "attendance-percentage-report/",
+    views.AttendancePercentageReportView.as_view(),
+    name="attendance-percentage-report",
+),
+
+path(
+    "download-all-students-pdf/",
+    views.download_all_students_pdf,
+    name="download-all-students-pdf",
+),
+
+path(
+    "download-student-pdf/<int:pk>/",
+    views.download_student_pdf,
+    name="download-student-pdf",
+),
 ]

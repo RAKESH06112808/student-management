@@ -669,123 +669,78 @@
 
     <aside class="sidebar">
 
-        <a
-            href="{% url 'dashboard' %}"
-            class="brand"
-        >
-
-            <div class="brand-icon">
-                🎓
-            </div>
-
-            <div class="brand-text">
-
-                Student Management
-
-                <span class="brand-subtitle">
-                    College Management System
-                </span>
-
-            </div>
-
-        </a>
-
-
-        <div class="sidebar-section">
-            Main Menu
+    <a href="{% url 'dashboard' %}" class="brand">
+        <div class="brand-icon">🎓</div>
+        <div class="brand-text">
+            Student Management
+            <span class="brand-subtitle">
+                College Management System
+            </span>
         </div>
+    </a>
 
+    {% if user.is_authenticated %}
 
-        {% if user.is_authenticated %}
+        <div class="sidebar-section">Main Menu</div>
 
+        {% if user.is_superuser %}
+
+            <a href="{% url 'dashboard' %}" class="sidebar-link">
+                <span class="sidebar-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="{% url 'student-list' %}" class="sidebar-link">
+                <span class="sidebar-icon">👥</span>
+                Students
+            </a>
+
+            <a href="{% url 'attendance-percentage-report' %}"
+               class="sidebar-link">
+                <span class="sidebar-icon">📊</span>
+                Attendance Percentage Report
+            </a>
+
+        {% elif user.faculty_profile %}
+
+            <a href="{% url 'attendance-percentage-report' %}"
+               class="sidebar-link">
+                <span class="sidebar-icon">📊</span>
+                Attendance Percentage Report
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'my-profile' %}" class="sidebar-link">
+                <span class="sidebar-icon">👤</span>
+                My Profile
+            </a>
+
+            <a href="{% url 'my-attendance' %}" class="sidebar-link">
+                <span class="sidebar-icon">📅</span>
+                My Attendance
+            </a>
+
+        {% endif %}
+
+        <div class="sidebar-section mt-4">Account</div>
+
+        <div class="sidebar-link">
+            <span class="sidebar-icon">🔐</span>
 
             {% if user.is_superuser %}
-
-                <a
-                    href="{% url 'dashboard' %}"
-                    class="sidebar-link"
-                >
-
-                    <span class="sidebar-icon">
-                        🏠
-                    </span>
-
-                    Dashboard
-
-                </a>
-
-
-                <a
-                    href="{% url 'student-list' %}"
-                    class="sidebar-link"
-                >
-
-                    <span class="sidebar-icon">
-                        👥
-                    </span>
-
-                    Students
-
-                </a>
-
-
+                HOD / Admin
+            {% elif user.faculty_profile %}
+                {{ user.faculty_profile.branch.code }} Faculty
             {% else %}
-
-                <a
-                    href="{% url 'my-profile' %}"
-                    class="sidebar-link"
-                >
-
-                    <span class="sidebar-icon">
-                        👤
-                    </span>
-
-                    My Profile
-
-                </a>
-
-
-                <a
-                    href="{% url 'my-attendance' %}"
-                    class="sidebar-link"
-                >
-
-                    <span class="sidebar-icon">
-                        📅
-                    </span>
-
-                    My Attendance
-
-                </a>
-
+                Student
             {% endif %}
-
-
-        {% endif %}
-
-
-        <div class="sidebar-section mt-4">
-            Account
         </div>
 
+    {% endif %}
 
-        {% if user.is_authenticated %}
 
-            <div class="sidebar-link">
 
-                <span class="sidebar-icon">
-                    🔐
-                </span>
-
-                {% if user.is_superuser %}
-                    HOD / Admin
-                {% else %}
-                    Student
-                {% endif %}
-
-            </div>
-
-        {% endif %}
 
 
         {% if user.is_authenticated %}

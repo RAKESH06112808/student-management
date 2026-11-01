@@ -1,34 +1,70 @@
 {% extends "students/base.html" %}
 
 {% block content %}
+
 <div class="container mt-4">
 
-    <h2>{{ branch.name }} Students</h2>
+    <div class="mb-4">
+        <h2>{{ branch.code }} Dashboard</h2>
+        <p class="text-muted">{{ branch.name }}</p>
+    </div>
 
-    {% if students %}
-        <div class="table-responsive mt-3">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Roll Number</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in students %}
-                        <tr>
-                            <td>{{ student.name }}</td>
-                            <td>{{ student.roll_number }}</td>
-                            <td>{{ student.status }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Students</h6>
+                    <h2>{{ total_students }}</h2>
+                </div>
+            </div>
         </div>
-    {% else %}
-        <p class="mt-3">No students found in this branch.</p>
-    {% endif %}
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Active Students</h6>
+                    <h2 class="text-success">{{ active_students }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Inactive Students</h6>
+                    <h2 class="text-danger">{{ inactive_students }}</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Open Dashboard -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <h5>Student Management</h5>
+
+            <p class="text-muted">
+                Open the {{ branch.code }} student records
+                and manage attendance.
+            </p>
+
+            <a href="{% url 'student-list' %}?branch={{ branch.code }}"
+               class="btn btn-primary">
+                👥 Open {{ branch.code }} Student Details
+            </a>
+
+            <a href="{% url 'bulk-attendance' branch.code %}"
+               class="btn btn-success">
+                📋 Attendance
+            </a>
+
+        </div>
+    </div>
 
 </div>
+
 {% endblock %}

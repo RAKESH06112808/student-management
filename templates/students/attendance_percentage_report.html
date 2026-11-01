@@ -1,0 +1,60 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <h2>📊 Attendance Percentage Report</h2>
+
+        <a href="{% url 'download-all-students-pdf' %}"
+           class="btn btn-danger">
+            📄 Download All Students PDF
+        </a>
+    </div>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Admission No.</th>
+                    <th>Roll No.</th>
+                    <th>Student Name</th>
+                    <th>Branch</th>
+                    <th>Attendance Percentage</th>
+                    <th>Individual PDF</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in attendance_report %}
+                <tr>
+                    <td>{{ item.student.admission_no }}</td>
+                    <td>{{ item.student.roll_no }}</td>
+                    <td>
+                        {{ item.student.first_name }}
+                        {{ item.student.last_name }}
+                    </td>
+                    <td>{{ item.student.branch.code }}</td>
+                    <td>
+                        <strong>{{ item.percentage }}%</strong>
+                    </td>
+                    <td>
+                        <a href="{% url 'download-student-pdf' item.student.pk %}"
+                           class="btn btn-primary btn-sm">
+                            📥 Download PDF
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        No student records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

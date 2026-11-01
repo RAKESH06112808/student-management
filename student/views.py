@@ -12,12 +12,13 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Student, Branch, HODProfile, Attendance
+from .models import FacultyProfile
 from .forms import StudentForm, AttendanceForm
 from .attendance_utils import calculate_attendance, get_default_attendance_status
 
@@ -25,11 +26,53 @@ class HODRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
 
-class AttendanceView(HODRequiredMixin, View):
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return (
+            self.request.user.is_superuser
+            or FacultyProfile.objects.filter(user=self.request.user).exists()
+        )
+
+
+class BranchAccessMixin:
+    def get_branch(self, code):
+        branch = get_object_or_404(Branch, code=code)
+
+        if not self.request.user.is_superuser:
+            if not FacultyProfile.objects.filter(
+                user=self.request.user,
+                branch=branch
+            ).exists():
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied
+
+        return branch
+
+
+class BranchScopedMixin:
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_superuser:
+            return queryset
+
+        branch_ids = FacultyProfile.objects.filter(
+            user=self.request.user
+        ).values_list("branch_id", flat=True)
+        return queryset.filter(branch_id__in=branch_ids)
+
+class AttendanceView(StaffRequiredMixin, View):
     template_name = "students/attendance.html"
 
     def get(self, request, pk):
         student = get_object_or_404(Student, pk=pk)
+
+        if not request.user.is_superuser:
+            if not FacultyProfile.objects.filter(
+                user=request.user,
+                branch=student.branch
+            ).exists():
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied
 
         selected_date = request.GET.get("date")
 
@@ -81,6 +124,14 @@ class AttendanceView(HODRequiredMixin, View):
     def post(self, request, pk):
         student = get_object_or_404(Student, pk=pk)
 
+        if not request.user.is_superuser:
+            if not FacultyProfile.objects.filter(
+                user=request.user,
+                branch=student.branch
+            ).exists():
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied
+
         selected_date = request.POST.get("date")
 
         try:
@@ -131,14 +182,22 @@ class AttendanceView(HODRequiredMixin, View):
             pk=student.pk,
         )
 
-class EditAttendanceView(HODRequiredMixin, View):
+class EditAttendanceView(StaffRequiredMixin, View):
     template_name = "students/attendance_edit.html"
 
     def get(self, request, pk):
         attendance = get_object_or_404(
-            Attendance,
-            pk=pk
+            Attendance.objects.select_related("student__branch"),
+            pk=pk,
         )
+
+        if not request.user.is_superuser:
+            if not FacultyProfile.objects.filter(
+                user=request.user,
+                branch=attendance.student.branch,
+            ).exists():
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied
 
         form = AttendanceForm(instance=attendance)
 
@@ -153,9 +212,17 @@ class EditAttendanceView(HODRequiredMixin, View):
 
     def post(self, request, pk):
         attendance = get_object_or_404(
-            Attendance,
-            pk=pk
+            Attendance.objects.select_related("student__branch"),
+            pk=pk,
         )
+
+        if not request.user.is_superuser:
+            if not FacultyProfile.objects.filter(
+                user=request.user,
+                branch=attendance.student.branch,
+            ).exists():
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied
 
         form = AttendanceForm(
             request.POST,
@@ -199,13 +266,20 @@ class DashboardView(HODRequiredMixin, TemplateView):
         return context
 
 
-class StudentListView(HODRequiredMixin, ListView):
+class StudentListView(BranchScopedMixin, StaffRequiredMixin, ListView):
     model = Student
     template_name = "students/student_list.html"
     context_object_name = "students"
 
     def get_queryset(self):
         students = Student.objects.select_related("branch")
+
+        if not self.request.user.is_superuser:
+            faculty = get_object_or_404(
+                FacultyProfile,
+                user=self.request.user
+            )
+            students = students.filter(branch=faculty.branch)
 
         search = self.request.GET.get("q", "").strip()
         branch = self.request.GET.get("branch", "").strip()
@@ -238,41 +312,82 @@ class StudentListView(HODRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["branches"] = Branch.objects.all()
+        if self.request.user.is_superuser:
+            context["branches"] = Branch.objects.all()
+        else:
+            context["branches"] = Branch.objects.filter(
+                faculty_members__user=self.request.user
+            )
         return context
 
 
-class StudentDetailView(HODRequiredMixin, DetailView):
+class AttendancePercentageReportView(StaffRequiredMixin, TemplateView):
+    template_name = "students/attendance_percentage_report.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        students = Student.objects.select_related("branch").all()
+
+        # Faculty can see only their assigned branch.
+        if not self.request.user.is_superuser:
+            faculty = get_object_or_404(
+                FacultyProfile,
+                user=self.request.user
+            )
+            students = students.filter(branch=faculty.branch)
+
+        report = []
+
+        for student in students.order_by("admission_no"):
+            records = Attendance.objects.filter(
+                student=student
+            ).order_by("date")
+
+            summary = calculate_attendance(records)
+
+            report.append({
+                "student": student,
+                "percentage": summary["percentage"],
+            })
+
+        context["attendance_report"] = report
+        return context
+
+
+class StudentDetailView(BranchScopedMixin, StaffRequiredMixin, DetailView):
     model = Student
     template_name = "students/student_detail.html"
     context_object_name = "student"
 
-
-class StudentCreateView(HODRequiredMixin, CreateView):
+class StudentCreateView(StaffRequiredMixin, CreateView):
     model = Student
     form_class = StudentForm
     template_name = "students/student_form.html"
     success_url = reverse_lazy("student-list")
 
     def form_valid(self, form):
+        if not self.request.user.is_superuser:
+            form.instance.branch = self.request.user.faculty_profile.branch
+
         response = super().form_valid(form)
 
         messages.success(
             self.request,
             f"Student {self.object.first_name} {self.object.last_name} was added successfully."
         )
-
         return response
 
-    
-
-class StudentUpdateView(HODRequiredMixin, UpdateView):
+class StudentUpdateView(BranchScopedMixin, StaffRequiredMixin, UpdateView):
     model = Student
     form_class = StudentForm
     template_name = "students/student_form.html"
     success_url = reverse_lazy("student-list")
 
     def form_valid(self, form):
+        if not self.request.user.is_superuser:
+            form.instance.branch = self.request.user.faculty_profile.branch
+
         response = super().form_valid(form)
 
         messages.success(
@@ -281,11 +396,8 @@ class StudentUpdateView(HODRequiredMixin, UpdateView):
         )
 
         return response
-    
 
-    
-
-class StudentDeleteView(HODRequiredMixin, DeleteView):
+class StudentDeleteView(BranchScopedMixin, StaffRequiredMixin, DeleteView):
     model = Student
     template_name = "students/student_confirm_delete.html"
     success_url = reverse_lazy("student-list")
@@ -302,24 +414,34 @@ class StudentDeleteView(HODRequiredMixin, DeleteView):
 
         return response
 
-class BranchDashboardView(LoginRequiredMixin, TemplateView):
+class BranchDashboardView(StaffRequiredMixin, BranchAccessMixin, TemplateView):
     template_name = "students/branch_dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         code = self.kwargs.get("code")
-        branch = get_object_or_404(Branch, code=code)
+        branch = self.get_branch(code)
+
         students = Student.objects.filter(branch=branch)
+
         context["branch"] = branch
-        context["students"] = students
+        context["total_students"] = students.count()
+        context["active_students"] = students.filter(
+            status="Active"
+        ).count()
+        context["inactive_students"] = students.exclude(
+            status="Active"
+        ).count()
+
         return context
 
 
-class BulkAttendanceView(HODRequiredMixin, View):
+class BulkAttendanceView(StaffRequiredMixin, BranchAccessMixin, View):
     template_name = "students/bulk_attendance.html"
 
     def get(self, request, code):
-        branch = get_object_or_404(Branch, code=code)
+        branch = self.get_branch(code)
 
         selected_date = request.GET.get("date")
         if selected_date:
@@ -366,7 +488,7 @@ class BulkAttendanceView(HODRequiredMixin, View):
         })
 
     def post(self, request, code):
-        branch = get_object_or_404(Branch, code=code)
+        branch = self.get_branch(code)
 
         selected_date = request.POST.get("date")
         status = request.POST.get("status")
@@ -537,8 +659,18 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         if self.request.user.is_superuser:
             return "/"
-        return "/my-profile/"
 
+        faculty = FacultyProfile.objects.filter(
+            user=self.request.user
+        ).select_related("branch").first()
+
+        if faculty:
+            return reverse(
+                "branch-dashboard",
+                kwargs={"code": faculty.branch.code}
+            )
+
+        return "/my-profile/"
 class ForgotPasswordView(TemplateView):
     template_name = "registration/forgot_password.html"
 
@@ -798,31 +930,53 @@ class NewPasswordView(TemplateView):
 
     # =========================
 # PDF DOWNLOAD VIEWS
-# =========================
-
+# ========================= 
+# 
+#
 def download_all_students_pdf(request):
-    if not request.user.is_authenticated or not request.user.is_superuser:
+    if not request.user.is_authenticated:
         return redirect("login")
 
-    students = Student.objects.select_related("branch").all().order_by(
-        "admission_no"
-    )
+    students = Student.objects.select_related("branch").all()
+
+    # Main Admin can download all students.
+    # Faculty can download only their own branch.
+    if not request.user.is_superuser:
+        faculty = get_object_or_404(
+            FacultyProfile,
+            user=request.user
+        )
+        students = students.filter(branch=faculty.branch)
+
+    students = students.order_by("admission_no")
 
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer)
-
-    pdf.setTitle("All Students")
+    pdf.setTitle("Students Attendance Report")
 
     y = 800
-
     pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(50, y, "All Students")
-    y -= 30
 
+    if request.user.is_superuser:
+        pdf.drawString(50, y, "All Students Attendance Report")
+    else:
+        pdf.drawString(
+            50, y,
+            f"{faculty.branch.code} Students Attendance Report"
+        )
+
+    y -= 30
     pdf.setFont("Helvetica", 10)
 
     for student in students:
         full_name = f"{student.first_name} {student.last_name}".strip()
+
+        records = Attendance.objects.filter(
+            student=student
+        ).order_by("date")
+
+        summary = calculate_attendance(records)
+        attendance_percentage = summary["percentage"]
 
         lines = [
             f"Admission No: {student.admission_no}",
@@ -832,11 +986,10 @@ def download_all_students_pdf(request):
             f"Admission Year: {student.admission_year}",
             f"Semester: {student.current_semester}",
             f"Gender: {student.gender}",
-            f"Date of Birth: {student.date_of_birth or ''}",
             f"Phone: {student.phone}",
             f"Email: {student.email}",
             f"Status: {student.status}",
-            f"Address: {student.address}",
+            f"Attendance Percentage: {attendance_percentage}%",
         ]
 
         for line in lines:
@@ -851,23 +1004,18 @@ def download_all_students_pdf(request):
         y -= 15
 
     pdf.save()
-
     buffer.seek(0)
 
     response = HttpResponse(
         buffer,
         content_type="application/pdf"
     )
-
     response["Content-Disposition"] = (
-        'attachment; filename="all_students.pdf"'
+        'attachment; filename="students_attendance_report.pdf"'
     )
-
     return response
-
-
 def download_student_pdf(request, pk):
-    if not request.user.is_authenticated or not request.user.is_superuser:
+    if not request.user.is_authenticated:
         return redirect("login")
 
     student = get_object_or_404(
@@ -875,15 +1023,32 @@ def download_student_pdf(request, pk):
         pk=pk
     )
 
+    # Faculty can download only their own branch students.
+    if not request.user.is_superuser:
+        faculty = get_object_or_404(
+            FacultyProfile,
+            user=request.user
+        )
+
+        if student.branch_id != faculty.branch_id:
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied
+
+    # Calculate attendance using existing rules.
+    attendance_records = Attendance.objects.filter(
+        student=student
+    ).order_by("date")
+
+    summary = calculate_attendance(attendance_records)
+    attendance_percentage = summary["percentage"]
+
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer)
 
     full_name = f"{student.first_name} {student.last_name}".strip()
-
     pdf.setTitle(f"Student Profile - {full_name}")
 
     y = 800
-
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawString(50, y, "Student Profile")
     y -= 35
@@ -903,6 +1068,7 @@ def download_student_pdf(request, pk):
         f"Admission Year: {student.admission_year}",
         f"Current Semester: {student.current_semester}",
         f"Status: {student.status}",
+        f"Attendance Percentage: {attendance_percentage}%",
     ]
 
     for line in lines:
@@ -910,7 +1076,6 @@ def download_student_pdf(request, pk):
         y -= 25
 
     pdf.save()
-
     buffer.seek(0)
 
     response = HttpResponse(
@@ -918,16 +1083,12 @@ def download_student_pdf(request, pk):
         content_type="application/pdf"
     )
 
-    filename = (
-        f"{student.admission_no}_student_profile.pdf"
-    )
-
+    filename = f"{student.admission_no}_student_profile.pdf"
     response["Content-Disposition"] = (
         f'attachment; filename="{filename}"'
     )
 
     return response
-
 
 def download_my_profile_pdf(request):
     if not request.user.is_authenticated:
