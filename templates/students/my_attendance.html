@@ -7,6 +7,16 @@
     <h2>My Attendance</h2>
 
     <div class="mb-3">
+
+    <a href="{% url 'my-attendance-pdf' %}"
+       class="btn btn-danger">
+        <i class="bi bi-file-earmark-pdf"></i>
+        Download Attendance PDF
+    </a>
+
+</div>
+
+    <div class="mb-3">
         <strong>Student:</strong>
         {{ student.first_name }} {{ student.last_name }}
         <br>

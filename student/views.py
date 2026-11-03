@@ -1014,7 +1014,8 @@ def download_all_students_pdf(request):
         'attachment; filename="students_attendance_report.pdf"'
     )
     return response
-def download_student_pdf(request, pk):
+def download_student_pdf(request, pk):      
+
     if not request.user.is_authenticated:
         return redirect("login")
 
@@ -1084,6 +1085,99 @@ def download_student_pdf(request, pk):
     )
 
     filename = f"{student.admission_no}_student_profile.pdf"
+    response["Content-Disposition"] = (
+        f'attachment; filename="{filename}"'
+    )
+
+    return response
+
+
+def download_my_attendance_pdf(request):
+
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    # Get only the logged-in student's record
+    student = get_object_or_404(
+        Student.objects.select_related("branch"),
+        user=request.user
+    )
+
+    records = Attendance.objects.filter(
+        student=student
+    ).order_by("date")
+
+    # Use existing attendance calculation rules
+    summary = calculate_attendance(records)
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+
+    full_name = f"{student.first_name} {student.last_name}".strip()
+
+    pdf.setTitle(f"Attendance Report - {full_name}")
+
+    y = 800
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, y, "STUDENT ATTENDANCE REPORT")
+    y -= 40
+
+    pdf.setFont("Helvetica", 11)
+
+    details = [
+        f"Student Name: {full_name}",
+        f"Admission Number: {student.admission_no}",
+        f"Roll Number: {student.roll_no}",
+        f"Branch: {student.branch.code}",
+        f"Semester: {student.current_semester}",
+        f"Attendance Percentage: {summary['percentage']}%",
+    ]
+
+    for line in details:
+        pdf.drawString(50, y, line)
+        y -= 25
+
+    y -= 20
+
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(50, y, "Date")
+    pdf.drawString(200, y, "Status")
+    pdf.drawString(350, y, "Extension Day")
+
+    y -= 20
+    pdf.setFont("Helvetica", 10)
+
+    for record in records:
+        if y < 60:
+            pdf.showPage()
+            y = 800
+            pdf.setFont("Helvetica-Bold", 11)
+            pdf.drawString(50, y, "Date")
+            pdf.drawString(200, y, "Status")
+            pdf.drawString(350, y, "Extension Day")
+            y -= 20
+            pdf.setFont("Helvetica", 10)
+
+        pdf.drawString(50, y, str(record.date))
+        pdf.drawString(200, y, str(record.status))
+        pdf.drawString(
+            350, y,
+            "Yes" if record.is_extension_day else "No"
+        )
+
+        y -= 20
+
+    pdf.save()
+    buffer.seek(0)
+
+    response = HttpResponse(
+        buffer,
+        content_type="application/pdf"
+    )
+
+    filename = f"{student.admission_no}_attendance.pdf"
+
     response["Content-Disposition"] = (
         f'attachment; filename="{filename}"'
     )

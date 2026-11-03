@@ -729,7 +729,7 @@
             <span class="sidebar-icon">🔐</span>
 
             {% if user.is_superuser %}
-                HOD / Admin
+                Principal
             {% elif user.faculty_profile %}
                 {{ user.faculty_profile.branch.code }} Faculty
             {% else %}
@@ -805,7 +805,16 @@
 
     <main class="main-content">
 
-        {% block content %}
+      <div class="container mt-3">
+    <button type="button"
+            class="btn btn-outline-secondary"
+            onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = this.dataset.dashboardUrl; }"
+            data-dashboard-url="{% if request.user.is_superuser %}{% url 'dashboard' %}{% elif request.user.faculty_profile %}{% url 'branch-dashboard' request.user.faculty_profile.branch.code %}{% else %}{% url 'my-profile' %}{% endif %}">
+        ← Back
+    </button>
+</div>
+
+      {% block content %}
 
         {% endblock %}
 

@@ -96,6 +96,12 @@ urlpatterns = [
     ),
 
     path(
+    "my-attendance/pdf/",
+    views.download_my_attendance_pdf,
+    name="my-attendance-pdf"
+),
+
+    path(
         "forgot-password/",
         ForgotPasswordView.as_view(),
         name="forgot_password"
